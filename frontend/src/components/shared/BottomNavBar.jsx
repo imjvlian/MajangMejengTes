@@ -2,7 +2,13 @@ import { toast } from "@/hooks/use-toast";
 import { signInSuccess } from "@/redux/user/userSlice";
 import React from "react";
 import { BiCategory } from "react-icons/bi";
-import { FaComments, FaHome, FaSignOutAlt, FaUserAlt, FaUsers } from "react-icons/fa";
+import {
+  FaComments,
+  FaHome,
+  FaSignOutAlt,
+  FaUserAlt,
+  FaUsers,
+} from "react-icons/fa";
 import { IoIosCreate, IoIosDocument } from "react-icons/io";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
@@ -62,7 +68,7 @@ const BottomNavBar = () => {
       {currentUser && currentUser.isAdmin && (
         <Link
           to={"/dashboard?tab=categories"}
-          className="flex items-center p-2 hover:bg-slate-300 dark:hover:bg-slate-700 rounded"
+          className="flex flex-col items-center text-slate-800"
         >
           <BiCategory className="mr-3" />
           <span>Categories</span>
@@ -70,24 +76,24 @@ const BottomNavBar = () => {
       )}
 
       {currentUser && currentUser.isAdmin && (
-                    <Link
-                      to={"/dashboard?tab=users"}
-                      className="flex items-center p-2 hover:bg-slate-300 rounded"
-                    >
-                      <FaUsers className="mr-3" />
-                      <span>All Users</span>
-                    </Link>
-                )}
-      
-                {currentUser && currentUser.isAdmin && (
-                    <Link
-                      to={"/dashboard?tab=comments"}
-                      className="flex items-center p-2 hover:bg-slate-300 rounded"
-                    >
-                      <FaComments className="mr-3" />
-                      <span>All Comments</span>
-                    </Link>
-                )}
+        <Link
+          to={"/dashboard?tab=users"}
+          className="flex flex-col items-center text-slate-800"
+        >
+          <FaUsers className="mr-3" />
+          <span>All Users</span>
+        </Link>
+      )}
+
+      {currentUser && currentUser.isAdmin && (
+        <Link
+          to={"/dashboard?tab=comments"}
+          className="flex flex-col items-center text-slate-800"
+        >
+          <FaComments className="mr-3" />
+          <span>All Comments</span>
+        </Link>
+      )}
 
       <button
         className="flex flex-col items-center text-slate-800"
