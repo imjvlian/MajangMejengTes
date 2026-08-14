@@ -9,7 +9,8 @@ export default defineConfig({
     proxy: {
       "/api": {
         target: "https://majangmejeng-production.up.railway.app",
-        secure: false
+        changeOrigin: true,
+        secure: true,
       },
     },
   },
