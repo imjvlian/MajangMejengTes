@@ -108,7 +108,7 @@ const HeroSection = ({ latestPost }) => {
               </div>
 
               <iframe
-                src="http://localhost:5173/"
+                src="https://www.instagram.com/majangmejeng_"
                 className="w-full h-[500px]"
               />
             </div>
