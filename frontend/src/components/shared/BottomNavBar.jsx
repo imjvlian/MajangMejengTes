@@ -71,7 +71,7 @@ const BottomNavBar = () => {
           className="flex flex-col items-center text-slate-800"
         >
           <BiCategory className="mr-3" />
-          <span>Categories</span>
+          <span className="text-xs">Categories</span>
         </Link>
       )}
 
@@ -81,7 +81,7 @@ const BottomNavBar = () => {
           className="flex flex-col items-center text-slate-800"
         >
           <FaUsers className="mr-3" />
-          <span>All Users</span>
+          <span className="text-xs">All Users</span>
         </Link>
       )}
 
@@ -91,7 +91,7 @@ const BottomNavBar = () => {
           className="flex flex-col items-center text-slate-800"
         >
           <FaComments className="mr-3" />
-          <span>All Comments</span>
+          <span className="text-xs">All Comments</span>
         </Link>
       )}
 
