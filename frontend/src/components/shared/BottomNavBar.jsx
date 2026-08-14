@@ -1,7 +1,8 @@
 import { toast } from "@/hooks/use-toast";
 import { signInSuccess } from "@/redux/user/userSlice";
 import React from "react";
-import { FaHome, FaSignOutAlt, FaUserAlt } from "react-icons/fa";
+import { BiCategory } from "react-icons/bi";
+import { FaComments, FaHome, FaSignOutAlt, FaUserAlt, FaUsers } from "react-icons/fa";
 import { IoIosCreate, IoIosDocument } from "react-icons/io";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
@@ -57,6 +58,36 @@ const BottomNavBar = () => {
           <span className="text-xs">Posts</span>
         </Link>
       )}
+
+      {currentUser && currentUser.isAdmin && (
+        <Link
+          to={"/dashboard?tab=categories"}
+          className="flex items-center p-2 hover:bg-slate-300 dark:hover:bg-slate-700 rounded"
+        >
+          <BiCategory className="mr-3" />
+          <span>Categories</span>
+        </Link>
+      )}
+
+      {currentUser && currentUser.isAdmin && (
+                    <Link
+                      to={"/dashboard?tab=users"}
+                      className="flex items-center p-2 hover:bg-slate-300 rounded"
+                    >
+                      <FaUsers className="mr-3" />
+                      <span>All Users</span>
+                    </Link>
+                )}
+      
+                {currentUser && currentUser.isAdmin && (
+                    <Link
+                      to={"/dashboard?tab=comments"}
+                      className="flex items-center p-2 hover:bg-slate-300 rounded"
+                    >
+                      <FaComments className="mr-3" />
+                      <span>All Comments</span>
+                    </Link>
+                )}
 
       <button
         className="flex flex-col items-center text-slate-800"
