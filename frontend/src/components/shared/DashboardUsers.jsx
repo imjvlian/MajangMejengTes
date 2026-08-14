@@ -37,7 +37,11 @@ const DashboardUsers = () => {
         const data = await res.json();
 
         if (res.ok) {
-          setUsers(data.users);
+          const sortedUsers = data.users.sort(
+            (a, b) => Number(b.isAdmin) - Number(a.isAdmin),
+          );
+
+          setUsers(sortedUsers);
 
           if (data.users.length < 9) {
             setShowMore(false);
