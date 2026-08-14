@@ -32,7 +32,7 @@ const DashboardUsers = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await fetch(`/api/user/getusers`);
+        const res = await fetch(`/api/user/getUsers`);
 
         const data = await res.json();
 
