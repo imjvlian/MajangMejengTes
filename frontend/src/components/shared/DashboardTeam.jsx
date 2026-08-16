@@ -13,6 +13,7 @@ import {
   FaUpload,
   FaInstagram,
   FaWhatsapp,
+  FaEnvelope,
   FaImage,
   FaSpinner,
   FaUsers,
@@ -26,6 +27,10 @@ import {
 
 const DashboardTeam = () => {
   const { currentUser } = useSelector((state) => state.user);
+
+  // ============================================================
+  // STATE
+  // ============================================================
 
   const [team, setTeam] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -41,20 +46,21 @@ const DashboardTeam = () => {
     name: "",
     role: "",
     position: "",
-    bio: "",
+    category: "Team",
     image: "",
     imageFileId: "",
+    shortBio: "",
+    bio: "",
     instagram: "",
     whatsapp: "",
+    email: "",
     order: 0,
     isActive: true,
   });
 
-  /*
-  |--------------------------------------------------------------------------
-  | FETCH TEAM
-  |--------------------------------------------------------------------------
-  */
+  // ============================================================
+  // FETCH TEAM
+  // ============================================================
 
   const fetchTeam = async () => {
     try {
@@ -62,28 +68,36 @@ const DashboardTeam = () => {
 
       const res = await fetch("/api/team");
 
-      const data = await res.json();
+      const contentType = res.headers.get("content-type") || "";
+
+      let data;
+
+      if (contentType.includes("application/json")) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+
+        throw new Error(
+          `Server returned ${res.status}: ${text.slice(0, 200)}`
+        );
+      }
 
       if (!res.ok) {
-        console.error(data.message || "Failed to fetch team");
-        setTeam([]);
-        return;
+        throw new Error(data.message || "Failed to fetch team.");
       }
 
       /*
        * API bisa mengembalikan:
        *
+       * [...]
+       *
        * {
        *   teams: [...]
        * }
        *
-       * atau:
-       *
        * {
        *   team: [...]
        * }
-       *
-       * atau langsung array.
        */
 
       const teamData = Array.isArray(data)
@@ -109,11 +123,9 @@ const DashboardTeam = () => {
     }
   }, [currentUser]);
 
-  /*
-  |--------------------------------------------------------------------------
-  | HANDLE INPUT
-  |--------------------------------------------------------------------------
-  */
+  // ============================================================
+  // HANDLE INPUT
+  // ============================================================
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -124,57 +136,46 @@ const DashboardTeam = () => {
     }));
   };
 
-  /*
-  |--------------------------------------------------------------------------
-  | IMAGE SELECT
-  |--------------------------------------------------------------------------
-  */
+  // ============================================================
+  // IMAGE SELECT
+  // ============================================================
 
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
 
     if (!file) return;
 
-    /*
-     * Validasi tipe file
-     */
-
+    // Validate type
     if (!file.type.startsWith("image/")) {
       alert("Please select an image file.");
+      e.target.value = "";
       return;
     }
 
-    /*
-     * Maksimal 5MB
-     */
-
+    // Validate size
     if (file.size > 5 * 1024 * 1024) {
       alert("Image size must be less than 5MB.");
+      e.target.value = "";
       return;
+    }
+
+    // Revoke old blob preview
+    if (previewImage && previewImage.startsWith("blob:")) {
+      URL.revokeObjectURL(previewImage);
     }
 
     setSelectedFile(file);
-
-    /*
-     * Preview lokal sebelum upload
-     */
 
     const objectUrl = URL.createObjectURL(file);
 
     setPreviewImage(objectUrl);
   };
 
-  /*
-  |--------------------------------------------------------------------------
-  | RESET FORM
-  |--------------------------------------------------------------------------
-  */
+  // ============================================================
+  // RESET FORM
+  // ============================================================
 
   const resetForm = () => {
-    /*
-     * Bersihkan object URL preview
-     */
-
     if (previewImage && previewImage.startsWith("blob:")) {
       URL.revokeObjectURL(previewImage);
     }
@@ -183,12 +184,14 @@ const DashboardTeam = () => {
       name: "",
       role: "",
       position: "",
-      email: "",
-      bio: "",
+      category: "Team",
       image: "",
       imageFileId: "",
+      shortBio: "",
+      bio: "",
       instagram: "",
       whatsapp: "",
+      email: "",
       order: 0,
       isActive: true,
     });
@@ -199,15 +202,14 @@ const DashboardTeam = () => {
     setShowForm(false);
   };
 
-  /*
-  |--------------------------------------------------------------------------
-  | SUBMIT
-  |--------------------------------------------------------------------------
-  */
+  // ============================================================
+  // SUBMIT
+  // ============================================================
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validation
     if (!formData.name.trim()) {
       alert("Name is required.");
       return;
@@ -218,34 +220,20 @@ const DashboardTeam = () => {
       return;
     }
 
-    if (!formData.position.trim()) {
-      alert("Position is required.");
-      return;
-    }
-
     try {
       setSubmitting(true);
 
-      let imageUrl = formData.image;
-      let imageFileId = formData.imageFileId;
+      let imageUrl = formData.image || "";
+      let imageFileId = formData.imageFileId || "";
 
-      /*
-      |--------------------------------------------------------------------------
-      | UPLOAD NEW IMAGE
-      |--------------------------------------------------------------------------
-      */
+      // ========================================================
+      // UPLOAD IMAGE TO APPWRITE
+      // ========================================================
 
       if (selectedFile) {
-        console.log("Uploading image to Appwrite...");
+        console.log("Uploading team image to Appwrite...");
 
         const uploadedFile = await uploadFile(selectedFile);
-
-        /*
-         * uploadFile dari helper bisa mengembalikan:
-         *
-         * file object
-         * atau file ID
-         */
 
         const newFileId =
           typeof uploadedFile === "string"
@@ -253,21 +241,21 @@ const DashboardTeam = () => {
             : uploadedFile?.$id || uploadedFile?.id;
 
         if (!newFileId) {
-          throw new Error("Appwrite upload did not return a file ID.");
+          throw new Error(
+            "Appwrite upload succeeded but no file ID was returned."
+          );
         }
 
         imageFileId = newFileId;
 
-        /*
-         * Ambil URL gambar dari Appwrite
-         */
-
         imageUrl = getFileView(newFileId);
 
-        /*
-         * Jika edit dan ada foto lama,
-         * hapus foto lama setelah upload baru berhasil.
-         */
+        console.log("New Appwrite file ID:", newFileId);
+        console.log("New Appwrite image URL:", imageUrl);
+
+        // ======================================================
+        // DELETE OLD IMAGE
+        // ======================================================
 
         if (
           editingId &&
@@ -276,42 +264,44 @@ const DashboardTeam = () => {
         ) {
           try {
             await deleteFile(formData.imageFileId);
+
+            console.log("Old Appwrite image deleted.");
           } catch (deleteError) {
             console.warn(
               "Old Appwrite image could not be deleted:",
-              deleteError,
+              deleteError
             );
           }
         }
       }
 
-      /*
-      |--------------------------------------------------------------------------
-      | PAYLOAD
-      |--------------------------------------------------------------------------
-      */
+      // ========================================================
+      // PAYLOAD
+      // ========================================================
 
       const payload = {
         name: formData.name.trim(),
 
-        /*
-         * role wajib karena schema backend kamu
-         * membutuhkan field ini.
-         */
-
+        // Required by MongoDB schema
         role: formData.role.trim(),
 
         position: formData.position.trim(),
 
+        category: formData.category.trim() || "Team",
+
+        image: imageUrl,
+
+        imageFileId,
+
+        shortBio: formData.shortBio.trim(),
+
         bio: formData.bio.trim(),
-
-        image: imageUrl || "",
-
-        imageFileId: imageFileId || "",
 
         instagram: formData.instagram.trim(),
 
         whatsapp: formData.whatsapp.trim(),
+
+        email: formData.email.trim(),
 
         order: Number(formData.order) || 0,
 
@@ -320,11 +310,9 @@ const DashboardTeam = () => {
 
       console.log("Team payload:", payload);
 
-      /*
-      |--------------------------------------------------------------------------
-      | API REQUEST
-      |--------------------------------------------------------------------------
-      */
+      // ========================================================
+      // API
+      // ========================================================
 
       const url = editingId ? `/api/team/${editingId}` : "/api/team";
 
@@ -338,14 +326,9 @@ const DashboardTeam = () => {
         body: JSON.stringify(payload),
       });
 
-      /*
-       * Jangan langsung res.json()
-       * karena sebelumnya kamu mendapatkan:
-       *
-       * Unexpected token '<'
-       *
-       * jika server mengembalikan HTML.
-       */
+      // ========================================================
+      // SAFE RESPONSE
+      // ========================================================
 
       const contentType = res.headers.get("content-type") || "";
 
@@ -356,25 +339,27 @@ const DashboardTeam = () => {
       } else {
         const text = await res.text();
 
-        throw new Error(`Server returned ${res.status}: ${text.slice(0, 200)}`);
+        throw new Error(
+          `Server returned ${res.status}: ${text.slice(0, 300)}`
+        );
       }
 
       if (!res.ok) {
         throw new Error(
-          data.message || data.error || "Failed to save team member.",
+          data.message ||
+            data.error ||
+            "Failed to save team member."
         );
       }
 
-      /*
-      |--------------------------------------------------------------------------
-      | SUCCESS
-      |--------------------------------------------------------------------------
-      */
+      // ========================================================
+      // SUCCESS
+      // ========================================================
 
       alert(
         editingId
           ? "Team member updated successfully."
-          : "Team member added successfully.",
+          : "Team member added successfully."
       );
 
       resetForm();
@@ -389,13 +374,13 @@ const DashboardTeam = () => {
     }
   };
 
-  /*
-  |--------------------------------------------------------------------------
-  | EDIT
-  |--------------------------------------------------------------------------
-  */
+  // ============================================================
+  // EDIT
+  // ============================================================
 
   const handleEdit = (member) => {
+    if (!member) return;
+
     setFormData({
       name: member.name || "",
 
@@ -403,15 +388,21 @@ const DashboardTeam = () => {
 
       position: member.position || "",
 
-      bio: member.bio || "",
+      category: member.category || "Team",
 
       image: member.image || "",
 
       imageFileId: member.imageFileId || "",
 
+      shortBio: member.shortBio || "",
+
+      bio: member.bio || "",
+
       instagram: member.instagram || "",
 
       whatsapp: member.whatsapp || "",
+
+      email: member.email || "",
 
       order: member.order ?? 0,
 
@@ -426,25 +417,21 @@ const DashboardTeam = () => {
 
     setShowForm(true);
 
-    /*
-     * Scroll ke form
-     */
-
     window.scrollTo({
       top: 0,
       behavior: "smooth",
     });
   };
 
-  /*
-  |--------------------------------------------------------------------------
-  | DELETE
-  |--------------------------------------------------------------------------
-  */
+  // ============================================================
+  // DELETE
+  // ============================================================
 
   const handleDelete = async (member) => {
+    if (!member?._id) return;
+
     const confirmed = window.confirm(
-      `Are you sure you want to delete ${member.name}?`,
+      `Are you sure you want to delete ${member.name}?`
     );
 
     if (!confirmed) return;
@@ -463,38 +450,44 @@ const DashboardTeam = () => {
       } else {
         const text = await res.text();
 
-        throw new Error(`Server returned ${res.status}: ${text.slice(0, 200)}`);
+        throw new Error(
+          `Server returned ${res.status}: ${text.slice(0, 300)}`
+        );
       }
 
       if (!res.ok) {
         throw new Error(
-          data.message || data.error || "Failed to delete team member.",
+          data.message ||
+            data.error ||
+            "Failed to delete team member."
         );
       }
 
-      /*
-       * Hapus foto dari Appwrite
-       */
+      // ========================================================
+      // DELETE APPWRITE IMAGE
+      // ========================================================
 
       if (member.imageFileId) {
         try {
           await deleteFile(member.imageFileId);
+
+          console.log("Appwrite team image deleted.");
         } catch (error) {
           console.warn(
-            "Team deleted but Appwrite image could not be deleted:",
-            error,
+            "Team member deleted but Appwrite image could not be deleted:",
+            error
           );
         }
       }
 
-      /*
-       * Update state tanpa fetch ulang
-       */
+      // ========================================================
+      // UPDATE LOCAL STATE
+      // ========================================================
 
       setTeam((prev) =>
         Array.isArray(prev)
           ? prev.filter((item) => item._id !== member._id)
-          : [],
+          : []
       );
 
       alert("Team member deleted successfully.");
@@ -505,15 +498,43 @@ const DashboardTeam = () => {
     }
   };
 
-  /*
-  |--------------------------------------------------------------------------
-  | TOGGLE ACTIVE
-  |--------------------------------------------------------------------------
-  */
+  // ============================================================
+  // TOGGLE ACTIVE
+  // ============================================================
 
   const handleToggle = async (member) => {
+    if (!member?._id) return;
+
     try {
-      const newStatus = !member.isActive;
+      const newStatus = !Boolean(member.isActive);
+
+      const payload = {
+        name: member.name || "",
+
+        role: member.role || "",
+
+        position: member.position || "",
+
+        category: member.category || "Team",
+
+        image: member.image || "",
+
+        imageFileId: member.imageFileId || "",
+
+        shortBio: member.shortBio || "",
+
+        bio: member.bio || "",
+
+        instagram: member.instagram || "",
+
+        whatsapp: member.whatsapp || "",
+
+        email: member.email || "",
+
+        order: Number(member.order) || 0,
+
+        isActive: newStatus,
+      };
 
       const res = await fetch(`/api/team/${member._id}`, {
         method: "PUT",
@@ -522,18 +543,7 @@ const DashboardTeam = () => {
           "Content-Type": "application/json",
         },
 
-        body: JSON.stringify({
-          name: member.name || "",
-          role: member.role || "",
-          position: member.position || "",
-          bio: member.bio || "",
-          image: member.image || "",
-          imageFileId: member.imageFileId || "",
-          instagram: member.instagram || "",
-          whatsapp: member.whatsapp || "",
-          order: Number(member.order) || 0,
-          isActive: newStatus,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const contentType = res.headers.get("content-type") || "";
@@ -545,15 +555,20 @@ const DashboardTeam = () => {
       } else {
         const text = await res.text();
 
-        throw new Error(`Server returned ${res.status}: ${text.slice(0, 200)}`);
+        throw new Error(
+          `Server returned ${res.status}: ${text.slice(0, 300)}`
+        );
       }
 
       if (!res.ok) {
         throw new Error(
-          data.message || data.error || "Failed to update team member.",
+          data.message ||
+            data.error ||
+            "Failed to update team member."
         );
       }
 
+      // Update local state
       setTeam((prev) =>
         Array.isArray(prev)
           ? prev.map((item) =>
@@ -562,9 +577,9 @@ const DashboardTeam = () => {
                     ...item,
                     isActive: newStatus,
                   }
-                : item,
+                : item
             )
-          : [],
+          : []
       );
     } catch (error) {
       console.error("Failed to toggle team member:", error);
@@ -573,11 +588,9 @@ const DashboardTeam = () => {
     }
   };
 
-  /*
-  |--------------------------------------------------------------------------
-  | AUTH
-  |--------------------------------------------------------------------------
-  */
+  // ============================================================
+  // AUTH
+  // ============================================================
 
   if (!currentUser?.isAdmin) {
     return (
@@ -587,41 +600,33 @@ const DashboardTeam = () => {
     );
   }
 
-  /*
-  |--------------------------------------------------------------------------
-  | SORT
-  |--------------------------------------------------------------------------
-  |
-  | Jangan gunakan:
-  |
-  | team.sort(...)
-  |
-  | karena bisa menyebabkan:
-  |
-  | t.sort is not a function
-  |
-  | Kita pastikan dulu Array.isArray().
-  */
+  // ============================================================
+  // SAFE SORT
+  // ============================================================
 
   const sortedTeam = Array.isArray(team)
-    ? [...team].sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0))
+    ? [...team].sort(
+        (a, b) =>
+          (Number(a?.order) || 0) -
+          (Number(b?.order) || 0)
+      )
     : [];
 
-  /*
-  |--------------------------------------------------------------------------
-  | RENDER
-  |--------------------------------------------------------------------------
-  */
+  // ============================================================
+  // RENDER
+  // ============================================================
 
   return (
     <div className="w-full p-4 md:p-8">
-      {/* =====================================================
+      {/* ======================================================
           HEADER
-      ====================================================== */}
+      ======================================================= */}
 
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Team</h1>
+          <h1 className="text-3xl font-bold">
+            Team
+          </h1>
 
           <p className="mt-1 text-muted-foreground">
             Manage the people displayed on the About page.
@@ -636,6 +641,7 @@ const DashboardTeam = () => {
               setShowForm(true);
             }
           }}
+          disabled={submitting}
         >
           {showForm ? (
             <>
@@ -651,22 +657,31 @@ const DashboardTeam = () => {
         </Button>
       </div>
 
-      {/* =====================================================
+      {/* ======================================================
           FORM
-      ====================================================== */}
+      ======================================================= */}
 
       {showForm && (
         <div className="mb-8 rounded-xl border bg-card p-6 shadow-sm">
           <h2 className="mb-6 text-xl font-semibold">
-            {editingId ? "Edit Team Member" : "Add Team Member"}
+            {editingId
+              ? "Edit Team Member"
+              : "Add Team Member"}
           </h2>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Name / Role */}
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-6"
+          >
+            {/* =================================================
+                NAME / ROLE
+            ================================================== */}
 
             <div className="grid gap-5 md:grid-cols-2">
               <div>
-                <label className="mb-2 block text-sm font-medium">Name</label>
+                <label className="mb-2 block text-sm font-medium">
+                  Name
+                </label>
 
                 <Input
                   name="name"
@@ -678,7 +693,9 @@ const DashboardTeam = () => {
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium">Role</label>
+                <label className="mb-2 block text-sm font-medium">
+                  Role
+                </label>
 
                 <Input
                   name="role"
@@ -689,27 +706,45 @@ const DashboardTeam = () => {
                 />
 
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Required by the Team model.
+                  Required.
                 </p>
               </div>
             </div>
 
-            {/* Position */}
+            {/* =================================================
+                POSITION / CATEGORY
+            ================================================== */}
 
-            <div>
-              <label className="mb-2 block text-sm font-medium">Position</label>
+            <div className="grid gap-5 md:grid-cols-2">
+              <div>
+                <label className="mb-2 block text-sm font-medium">
+                  Position
+                </label>
 
-              <Input
-                name="position"
-                value={formData.position}
-                onChange={handleChange}
-                placeholder="Editor in Chief"
-                required
-              />
+                <Input
+                  name="position"
+                  value={formData.position}
+                  onChange={handleChange}
+                  placeholder="Editor in Chief"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium">
+                  Category
+                </label>
+
+                <Input
+                  name="category"
+                  value={formData.category}
+                  onChange={handleChange}
+                  placeholder="Team"
+                />
+              </div>
             </div>
 
             {/* =================================================
-                IMAGE UPLOAD
+                IMAGE
             ================================================== */}
 
             <div>
@@ -724,14 +759,16 @@ const DashboardTeam = () => {
                   {previewImage ? (
                     <img
                       src={previewImage}
-                      alt="Preview"
+                      alt="Profile preview"
                       className="h-full w-full object-cover"
                     />
                   ) : (
                     <div className="flex h-full flex-col items-center justify-center text-muted-foreground">
                       <FaImage className="mb-2 text-3xl" />
 
-                      <span className="text-xs">No photo</span>
+                      <span className="text-xs">
+                        No photo
+                      </span>
                     </div>
                   )}
                 </div>
@@ -745,7 +782,9 @@ const DashboardTeam = () => {
                   >
                     <FaUpload className="mr-2" />
 
-                    {selectedFile ? "Change Photo" : "Choose Photo"}
+                    {selectedFile
+                      ? "Change Photo"
+                      : "Choose Photo"}
                   </label>
 
                   <input
@@ -761,19 +800,26 @@ const DashboardTeam = () => {
                     <br />
                     Maximum 5MB.
                     <br />
-                    Image will be uploaded to Appwrite.
+                    Uploaded directly to Appwrite.
                   </p>
 
                   {selectedFile && (
                     <div className="mt-3 rounded-lg bg-muted p-3 text-sm">
-                      <p className="font-medium">Selected file:</p>
+                      <p className="font-medium">
+                        Selected file:
+                      </p>
 
                       <p className="mt-1 break-all text-muted-foreground">
                         {selectedFile.name}
                       </p>
 
                       <p className="text-xs text-muted-foreground">
-                        {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                        {(
+                          selectedFile.size /
+                          1024 /
+                          1024
+                        ).toFixed(2)}{" "}
+                        MB
                       </p>
                     </div>
                   )}
@@ -781,62 +827,105 @@ const DashboardTeam = () => {
               </div>
             </div>
 
-            {/* Bio */}
+            {/* =================================================
+                SHORT BIO
+            ================================================== */}
 
             <div>
-              <label className="mb-2 block text-sm font-medium">Bio</label>
+              <label className="mb-2 block text-sm font-medium">
+                Short Bio
+              </label>
+
+              <Input
+                name="shortBio"
+                value={formData.shortBio}
+                onChange={handleChange}
+                placeholder="Journalist, editor, photographer..."
+              />
+            </div>
+
+            {/* =================================================
+                BIO
+            ================================================== */}
+
+            <div>
+              <label className="mb-2 block text-sm font-medium">
+                Biography
+              </label>
 
               <Textarea
                 name="bio"
                 value={formData.bio}
                 onChange={handleChange}
-                placeholder="Short biography..."
-                rows={5}
+                placeholder="Write a short biography..."
+                rows={6}
               />
             </div>
 
-            {/* Social */}
+            {/* =================================================
+                CONTACT
+            ================================================== */}
 
-            <div className="grid md:grid-cols-3 gap-5">
-              {/* Instagram */}
-              <div>
-                <label className="text-sm font-medium">Instagram</label>
+            <div>
+              <h3 className="mb-4 text-sm font-semibold">
+                Contact & Social Media
+              </h3>
 
-                <Input
-                  name="instagram"
-                  value={formData.instagram}
-                  onChange={handleChange}
-                  placeholder="https://instagram.com/username"
-                />
-              </div>
+              <div className="grid gap-5 md:grid-cols-3">
+                {/* Instagram */}
 
-              {/* WhatsApp */}
-              <div>
-                <label className="text-sm font-medium">WhatsApp</label>
+                <div>
+                  <label className="mb-2 flex items-center gap-2 text-sm font-medium">
+                    <FaInstagram />
+                    Instagram
+                  </label>
 
-                <Input
-                  name="whatsapp"
-                  value={formData.whatsapp}
-                  onChange={handleChange}
-                  placeholder="628123456789"
-                />
-              </div>
+                  <Input
+                    name="instagram"
+                    value={formData.instagram}
+                    onChange={handleChange}
+                    placeholder="https://instagram.com/username"
+                  />
+                </div>
 
-              {/* Email */}
-              <div>
-                <label className="text-sm font-medium">Email</label>
+                {/* WhatsApp */}
 
-                <Input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="email@example.com"
-                />
+                <div>
+                  <label className="mb-2 flex items-center gap-2 text-sm font-medium">
+                    <FaWhatsapp />
+                    WhatsApp
+                  </label>
+
+                  <Input
+                    name="whatsapp"
+                    value={formData.whatsapp}
+                    onChange={handleChange}
+                    placeholder="628123456789"
+                  />
+                </div>
+
+                {/* Email */}
+
+                <div>
+                  <label className="mb-2 flex items-center gap-2 text-sm font-medium">
+                    <FaEnvelope />
+                    Email
+                  </label>
+
+                  <Input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="email@example.com"
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Order / Active */}
+            {/* =================================================
+                ORDER / ACTIVE
+            ================================================== */}
 
             <div className="grid items-end gap-5 sm:grid-cols-2">
               <div>
@@ -851,11 +940,17 @@ const DashboardTeam = () => {
                   onChange={handleChange}
                   min="0"
                 />
+
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Lower number appears first.
+                </p>
               </div>
 
               <div className="flex items-center gap-3">
                 <Switch
-                  checked={formData.isActive}
+                  checked={Boolean(
+                    formData.isActive
+                  )}
                   onCheckedChange={(value) =>
                     setFormData((prev) => ({
                       ...prev,
@@ -864,28 +959,46 @@ const DashboardTeam = () => {
                   }
                 />
 
-                <span className="text-sm font-medium">Show on About page</span>
+                <div>
+                  <p className="text-sm font-medium">
+                    Show on About page
+                  </p>
+
+                  <p className="text-xs text-muted-foreground">
+                    {formData.isActive
+                      ? "Visible"
+                      : "Hidden"}
+                  </p>
+                </div>
               </div>
             </div>
 
-            {/* Buttons */}
+            {/* =================================================
+                BUTTONS
+            ================================================== */}
 
-            <div className="flex justify-end gap-3">
+            <div className="flex justify-end gap-3 border-t pt-5">
               <Button
                 type="button"
                 variant="outline"
                 onClick={resetForm}
                 disabled={submitting}
               >
+                <FaTimes className="mr-2" />
                 Cancel
               </Button>
 
-              <Button type="submit" disabled={submitting}>
+              <Button
+                type="submit"
+                disabled={submitting}
+              >
                 {submitting ? (
                   <>
                     <FaSpinner className="mr-2 animate-spin" />
 
-                    {editingId ? "Updating..." : "Uploading..."}
+                    {editingId
+                      ? "Updating..."
+                      : "Uploading..."}
                   </>
                 ) : editingId ? (
                   <>
@@ -904,13 +1017,15 @@ const DashboardTeam = () => {
         </div>
       )}
 
-      {/* =====================================================
+      {/* ======================================================
           TEAM LIST
-      ====================================================== */}
+      ======================================================= */}
 
       <div className="overflow-hidden rounded-xl border">
         <div className="border-b p-5">
-          <h2 className="text-lg font-semibold">Team Members</h2>
+          <h2 className="text-lg font-semibold">
+            Team Members
+          </h2>
 
           <p className="mt-1 text-sm text-muted-foreground">
             {sortedTeam.length} team member
@@ -918,8 +1033,12 @@ const DashboardTeam = () => {
           </p>
         </div>
 
+        {/* Loading */}
+
         {loading ? (
           <div className="p-8 text-center text-muted-foreground">
+            <FaSpinner className="mx-auto mb-3 animate-spin text-xl" />
+
             Loading team members...
           </div>
         ) : sortedTeam.length === 0 ? (
@@ -927,6 +1046,14 @@ const DashboardTeam = () => {
             <FaUsers className="mx-auto mb-3 text-3xl" />
 
             <p>No team members yet.</p>
+
+            <Button
+              className="mt-4"
+              onClick={() => setShowForm(true)}
+            >
+              <FaPlus className="mr-2" />
+              Add First Member
+            </Button>
           </div>
         ) : (
           <div className="divide-y">
@@ -935,34 +1062,57 @@ const DashboardTeam = () => {
                 key={member._id}
                 className="flex flex-col gap-5 p-5 md:flex-row md:items-center"
               >
-                {/* Image */}
+                {/* =================================================
+                    IMAGE
+                ================================================== */}
 
-                <img
-                  src={member.image || "https://via.placeholder.com/100"}
-                  alt={member.name}
-                  className="h-16 w-16 rounded-full bg-muted object-cover"
-                />
+                <div className="shrink-0">
+                  <img
+                    src={
+                      member.image ||
+                      "https://via.placeholder.com/100"
+                    }
+                    alt={member.name || "Team member"}
+                    className="h-16 w-16 rounded-full bg-muted object-cover"
+                  />
+                </div>
 
-                {/* Info */}
+                {/* =================================================
+                    INFO
+                ================================================== */}
 
                 <div className="min-w-0 flex-1">
-                  <h3 className="font-bold">{member.name}</h3>
+                  <h3 className="font-bold">
+                    {member.name}
+                  </h3>
 
                   <p className="text-sm font-medium text-orange-500">
-                    {member.position}
+                    {member.position ||
+                      member.role ||
+                      "Team Member"}
                   </p>
 
-                  {member.role && (
-                    <p className="text-xs text-muted-foreground">
-                      {member.role}
+                  {member.role &&
+                    member.position && (
+                      <p className="text-xs text-muted-foreground">
+                        {member.role}
+                      </p>
+                    )}
+
+                  {member.shortBio && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {member.shortBio}
                     </p>
                   )}
 
                   <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                    {member.bio || "No biography."}
+                    {member.bio ||
+                      "No biography."}
                   </p>
 
-                  <div className="mt-2 flex gap-3 text-xs text-muted-foreground">
+                  {/* Contact indicators */}
+
+                  <div className="mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground">
                     {member.instagram && (
                       <span className="flex items-center gap-1">
                         <FaInstagram />
@@ -976,29 +1126,48 @@ const DashboardTeam = () => {
                         WhatsApp
                       </span>
                     )}
+
+                    {member.email && (
+                      <span className="flex items-center gap-1">
+                        <FaEnvelope />
+                        Email
+                      </span>
+                    )}
                   </div>
                 </div>
 
-                {/* Status */}
+                {/* =================================================
+                    STATUS
+                ================================================== */}
 
-                <div className="flex items-center gap-2">
+                <div className="flex shrink-0 items-center gap-2">
                   <Switch
-                    checked={Boolean(member.isActive)}
-                    onCheckedChange={() => handleToggle(member)}
+                    checked={Boolean(
+                      member.isActive
+                    )}
+                    onCheckedChange={() =>
+                      handleToggle(member)
+                    }
                   />
 
                   <span className="text-sm">
-                    {member.isActive ? "Visible" : "Hidden"}
+                    {member.isActive
+                      ? "Visible"
+                      : "Hidden"}
                   </span>
                 </div>
 
-                {/* Actions */}
+                {/* =================================================
+                    ACTIONS
+                ================================================== */}
 
-                <div className="flex gap-2">
+                <div className="flex shrink-0 gap-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleEdit(member)}
+                    onClick={() =>
+                      handleEdit(member)
+                    }
                   >
                     <FaEdit className="mr-2" />
                     Edit
@@ -1007,7 +1176,9 @@ const DashboardTeam = () => {
                   <Button
                     variant="destructive"
                     size="sm"
-                    onClick={() => handleDelete(member)}
+                    onClick={() =>
+                      handleDelete(member)
+                    }
                   >
                     <FaTrash className="mr-2" />
                     Delete
