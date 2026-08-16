@@ -7,7 +7,6 @@ import {
   Camera,
   ChevronRight,
   Globe2,
-  Instagram,
   Mail,
   Newspaper,
   Play,
@@ -16,6 +15,7 @@ import {
   Users,
   X,
 } from "lucide-react";
+import { FaInstagram } from "react-icons/fa";
 
 import { Link } from "react-router-dom";
 
@@ -635,7 +635,7 @@ const About = () => {
                     rel="noreferrer"
                     className="flex items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-semibold transition hover:bg-muted"
                   >
-                    <Instagram className="h-4 w-4" />
+                    <FaInstagram className="h-4 w-4" />
                     Instagram
                   </a>
 
