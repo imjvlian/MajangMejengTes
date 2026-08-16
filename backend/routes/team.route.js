@@ -1,23 +1,18 @@
 import express from "express";
-import { verifyToken } from "../utils/verifyUser.js";
-
 import {
-  getTeams,
-  getAllTeams,
   createTeam,
+  getTeams,
   updateTeam,
   deleteTeam,
 } from "../controllers/team.controller.js";
 
+import { verifyToken } from "../utils/verifyUser.js";
+
 const router = express.Router();
 
-// Public
-router.get("/getTeams", getTeams);
-
-// Admin
-router.get("/getAllTeams", verifyToken, getAllTeams);
-router.post("/create", verifyToken, createTeam);
-router.put("/update/:teamId", verifyToken, updateTeam);
-router.delete("/delete/:teamId", verifyToken, deleteTeam);
+router.get("/", getTeams);
+router.post("/", verifyToken, createTeam);
+router.put("/:teamId", verifyToken, updateTeam);
+router.delete("/:teamId", verifyToken, deleteTeam);
 
 export default router;
