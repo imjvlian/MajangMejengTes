@@ -29,7 +29,7 @@ const About = () => {
         const data = await res.json();
 
         if (res.ok) {
-          setTeam(data.teams || []);
+          setTeam(Array.isArray(data.teams) ? data.teams : []);
         } else {
           console.log(data.message);
         }
@@ -43,9 +43,11 @@ const About = () => {
     fetchTeam();
   }, []);
 
-  const activeTeam = team
-    .filter((member) => member.isActive)
-    .sort((a, b) => (a.order || 0) - (b.order || 0));
+  const activeTeam = Array.isArray(team)
+    ? [...team]
+        .filter((member) => member.isActive)
+        .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0))
+    : [];
 
   return (
     <main className="min-h-screen bg-background">
