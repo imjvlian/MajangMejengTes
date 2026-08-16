@@ -6,6 +6,7 @@ import DashboardProfile from "@/components/shared/DashboardProfile";
 import DashboardSidebar from "@/components/shared/DashboardSidebar";
 import DashboardUsers from "@/components/shared/DashboardUsers";
 import MainDashboard from "@/components/shared/MainDashboard";
+import DashboardTeam from "@/components/shared/DashboardTeam";
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 
@@ -37,21 +38,23 @@ const Dashboard = () => {
       <div className="w-full">
         {tab === "profile" && <DashboardProfile />}
 
-      {/* articles */}
+        {/* articles */}
         {tab === "posts" && <DashboardPosts />}
 
-      {/* users */}
+        {/* users */}
         {tab === "users" && <DashboardUsers />}
 
-      {/* categories */}
+        {/* categories */}
         {tab === "categories" && <DashboardCategories />}
 
-      {/* dashboard */}
+        {/* team */}
+        {tab === "team" && <DashboardTeam />}
+
+        {/* dashboard */}
         {tab === "dashboard" && <MainDashboard />}
 
-      {/* comments */}
+        {/* comments */}
         {tab === "comments" && <DashboardComments />}
-
       </div>
     </div>
   );

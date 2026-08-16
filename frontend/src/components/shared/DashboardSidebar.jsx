@@ -1,7 +1,14 @@
 import { toast } from "@/hooks/use-toast";
 import { signOutSuccess } from "@/redux/user/userSlice";
 import React from "react";
-import { FaComments, FaSignOutAlt, FaUser, FaUserAlt, FaUsers } from "react-icons/fa";
+import {
+  FaComments,
+  FaSignOutAlt,
+  FaUser,
+  FaUserAlt,
+  FaUsers,
+  FaUserTie,
+} from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { IoIosCreate, IoIosDocument } from "react-icons/io";
@@ -108,6 +115,18 @@ const DashboardSidebar = () => {
               >
                 <FaUsers className="mr-3" />
                 <span>All Users</span>
+              </Link>
+            </li>
+          )}
+
+          {currentUser && currentUser.isAdmin && (
+            <li>
+              <Link
+                to={"/dashboard?tab=team"}
+                className="flex items-center p-2 hover:bg-slate-300 rounded"
+              >
+                <FaUserTie className="mr-3" />
+                <span>Team</span>
               </Link>
             </li>
           )}
