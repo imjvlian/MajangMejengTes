@@ -339,11 +339,7 @@ const Header = () => {
 
             <div
               className="
-                flex h-10 w-10
-                items-center justify-center
-                rounded-xl
-                bg-slate-100
-                dark:bg-slate-800
+                mt-5
               "
             >
               <DarkModeToggler />
