@@ -16,6 +16,15 @@ import React, { useState, useEffect } from "react";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
 import { useNavigate } from "react-router-dom";
+import {
+  ImagePlus,
+  Images,
+  Upload,
+  X,
+  FileText,
+  FolderOpen,
+  Send,
+} from "lucide-react";
 
 const CreatePost = () => {
   const { toast } = useToast();
@@ -57,7 +66,6 @@ const CreatePost = () => {
       }
 
       setImageUploading(true);
-
       setImageUploadError(null);
 
       const compressed = await compressImage(file);
@@ -70,6 +78,7 @@ const CreatePost = () => {
         image: postImageUrl,
         imageId: uploadedFile.$id,
       }));
+
       toast({ title: "Image uploaded successfully!" });
 
       if (postImageUrl) {
@@ -158,183 +167,453 @@ const CreatePost = () => {
   };
 
   return (
-    <div className="p-3 max-w-3xl mx-auto min-h-screen">
-      <h1 className="text-center text-3xl my-7 font-semibold text-slate-700">
-        Create a post
-      </h1>
-
-      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-        <div className="flex flex-col gap-4 sm:flex-row justify-between">
-          <Input
-            type="text"
-            placeholder="Title"
-            required
-            id="title"
-            className="w-full sm:w-3/4 h-12 border border-slate-400 focus-visible:ring-0 focus-visible:ring-offset-0"
-            onChange={(e) =>
-              setFormData((prev) => ({
-                ...prev,
-                title: e.target.value,
-              }))
-            }
-          />
-
-          <Select
-            value={formData.category || ""}
-            onValueChange={(value) =>
-              setFormData((prev) => ({
-                ...prev,
-                category: value,
-              }))
-            }
-          >
-            <SelectTrigger className="w-full sm:w-1/4 h-12 border border-slate-400 focus-visible:ring-0 focus-visible:ring-offset-0">
-              <SelectValue placeholder="Select a Category" />
-            </SelectTrigger>
-
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Category</SelectLabel>
-
-                {categories.map((category) => (
-                  <SelectItem key={category._id} value={category.slug}>
-                    {category.name}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="flex gap-4 items-center justify-between border-4 border-slate-600 border-dotted p-3">
-          <Input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setFile(e.target.files[0])}
-          />
-
-          <Button className="bg-slate-700" onClick={handleUploadImage}>
-            {imageUploading ? "Uploading..." : "Upload Image"}
-          </Button>
-        </div>
-
-        {imageUploadError && <p className="text-red-600">{imageUploadError}</p>}
-
-        {formData.image && (
-          <img
-            src={formData.image}
-            alt="upload"
-            className="w-full h-72 object-cover"
-          />
-        )}
-
-        <div className="flex gap-4 items-center justify-between border-4 border-dashed border-slate-600 p-3">
-          <Input
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={(e) => {
-              const newFiles = Array.from(e.target.files || []);
-
-              setGalleryFiles((prev) => {
-                const combined = [...prev, ...newFiles];
-
-                const unique = combined.filter(
-                  (file, index, self) =>
-                    index ===
-                    self.findIndex(
-                      (f) =>
-                        f.name === file.name &&
-                        f.size === file.size &&
-                        f.lastModified === file.lastModified,
-                    ),
-                );
-
-                if (unique.length > 3) {
-                  toast({
-                    title: "Maximum 3 images",
-                  });
-
-                  return unique.slice(0, 3);
-                }
-
-                return unique;
-              });
-
-              e.target.value = "";
-            }}
-          />
-
-          <Button
-            type="button"
-            className="bg-slate-700"
-            onClick={handleUploadGallery}
-          >
-            {galleryUploading ? "Uploading..." : "Upload Gallery"}
-          </Button>
-        </div>
-
-        {galleryFiles.length > 0 && (
-          <div className="grid grid-cols-3 gap-3">
-            {galleryFiles.map((file, index) => (
-              <div key={index} className="relative">
-                <img
-                  src={URL.createObjectURL(file)}
-                  className="w-full h-36 object-cover rounded-lg"
-                />
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    setGalleryFiles((prev) =>
-                      prev.filter((_, i) => i !== index),
-                    )
-                  }
-                  className="absolute top-2 right-2 w-6 h-6 rounded-full bg-red-600 text-white"
-                >
-                  ×
-                </button>
-              </div>
-            ))}
+    <div className="min-h-screen bg-slate-50 px-4 py-6 text-slate-900 dark:bg-[#020617] dark:text-white sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-4xl">
+        {/* =====================================================
+            HEADER
+        ====================================================== */}
+        <div className="mb-8">
+          <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-orange-500">
+            <FileText className="h-4 w-4" />
+            <span>CONTENT MANAGEMENT</span>
           </div>
-        )}
 
-        {formData.gallery && (
-          <div className="grid grid-cols-3 gap-3">
-            {formData.gallery.map((image, index) => (
-              <img
-                key={index}
-                src={image}
-                alt={`Gallery ${index + 1}`}
-                className="w-full h-36 object-cover rounded-lg"
-              />
-            ))}
-          </div>
-        )}
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
+            Create an Article
+          </h1>
 
-        <ReactQuill
-          theme="snow"
-          placeholder="Write something here..."
-          className="h-72  mb-12"
-          required
-          onChange={(value) => {
-            setFormData((prev) => ({
-              ...prev,
-              content: value,
-            }));
-          }}
-        />
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
+            Write, organize, and publish a new article for Majang Mejeng.
+          </p>
+        </div>
 
-        <Button
-          type="submit"
-          className="h-12 bg-green-600 font-semibold max-sm:mt-5 text-md"
+        <form
+          className="flex flex-col gap-6"
+          onSubmit={handleSubmit}
         >
-          Publish Your Article
-        </Button>
-        {createPostError && (
-          <p className="text-red-600 mt-5">{createPostError}</p>
-        )}
-      </form>
+          {/* =====================================================
+              BASIC INFORMATION
+          ====================================================== */}
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+            <div className="mb-5 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500/10">
+                <FileText className="h-5 w-5 text-orange-500" />
+              </div>
+
+              <div>
+                <h2 className="font-semibold text-slate-900 dark:text-white">
+                  Article Information
+                </h2>
+
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Add the title and category of your article.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-[1fr_240px]">
+              {/* Title */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  Article Title
+                </label>
+
+                <Input
+                  type="text"
+                  placeholder="Enter article title..."
+                  required
+                  id="title"
+                  className="h-12 rounded-xl border-slate-200 bg-slate-50 px-4 text-sm shadow-none transition-colors focus:border-orange-500 focus-visible:ring-2 focus-visible:ring-orange-500/20 dark:border-slate-700 dark:bg-slate-950"
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      title: e.target.value,
+                    }))
+                  }
+                />
+              </div>
+
+              {/* Category */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  Category
+                </label>
+
+                <Select
+                  value={formData.category || ""}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      category: value,
+                    }))
+                  }
+                >
+                  <SelectTrigger className="h-12 w-full rounded-xl border-slate-200 bg-slate-50 shadow-none dark:border-slate-700 dark:bg-slate-950">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Category</SelectLabel>
+
+                      {categories.map((category) => (
+                        <SelectItem
+                          key={category._id}
+                          value={category.slug}
+                        >
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </section>
+
+          {/* =====================================================
+              COVER IMAGE
+          ====================================================== */}
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+            <div className="mb-5 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500/10">
+                <ImagePlus className="h-5 w-5 text-orange-500" />
+              </div>
+
+              <div>
+                <h2 className="font-semibold text-slate-900 dark:text-white">
+                  Featured Image
+                </h2>
+
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Upload the main image for your article.
+                </p>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-950">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0 flex-1">
+                  <label className="flex min-h-20 cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white px-4 transition hover:border-orange-400 hover:bg-orange-50/50 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-orange-500">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) =>
+                        setFile(e.target.files[0])
+                      }
+                    />
+
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800">
+                        <ImagePlus className="h-5 w-5 text-slate-500" />
+                      </div>
+
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                          {file
+                            ? file.name
+                            : "Choose featured image"}
+                        </p>
+
+                        <p className="mt-1 text-xs text-slate-400">
+                          Click to browse your files
+                        </p>
+                      </div>
+                    </div>
+                  </label>
+                </div>
+
+                <Button
+                  type="button"
+                  className="h-11 rounded-xl bg-slate-900 px-5 font-semibold text-white shadow-sm transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
+                  onClick={handleUploadImage}
+                  disabled={imageUploading}
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+
+                  {imageUploading
+                    ? "Uploading..."
+                    : "Upload Image"}
+                </Button>
+              </div>
+            </div>
+
+            {imageUploadError && (
+              <p className="mt-3 text-sm font-medium text-red-600">
+                {imageUploadError}
+              </p>
+            )}
+
+            {formData.image && (
+              <div className="mt-5 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
+                <img
+                  src={formData.image}
+                  alt="upload"
+                  className="h-64 w-full object-cover sm:h-80"
+                />
+              </div>
+            )}
+          </section>
+
+          {/* =====================================================
+              GALLERY
+          ====================================================== */}
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+            <div className="mb-5 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500/10">
+                <Images className="h-5 w-5 text-orange-500" />
+              </div>
+
+              <div>
+                <h2 className="font-semibold text-slate-900 dark:text-white">
+                  Article Gallery
+                </h2>
+
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Add up to 3 additional images.
+                </p>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-950">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <label className="flex min-h-20 flex-1 cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white px-4 transition hover:border-orange-400 hover:bg-orange-50/50 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-orange-500">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => {
+                      const newFiles = Array.from(
+                        e.target.files || [],
+                      );
+
+                      setGalleryFiles((prev) => {
+                        const combined = [
+                          ...prev,
+                          ...newFiles,
+                        ];
+
+                        const unique = combined.filter(
+                          (file, index, self) =>
+                            index ===
+                            self.findIndex(
+                              (f) =>
+                                f.name === file.name &&
+                                f.size === file.size &&
+                                f.lastModified ===
+                                  file.lastModified,
+                            ),
+                        );
+
+                        if (unique.length > 3) {
+                          toast({
+                            title: "Maximum 3 images",
+                          });
+
+                          return unique.slice(0, 3);
+                        }
+
+                        return unique;
+                      });
+
+                      e.target.value = "";
+                    }}
+                  />
+
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800">
+                      <Images className="h-5 w-5 text-slate-500" />
+                    </div>
+
+                    <div>
+                      <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                        Choose gallery images
+                      </p>
+
+                      <p className="mt-1 text-xs text-slate-400">
+                        Maximum 3 images
+                      </p>
+                    </div>
+                  </div>
+                </label>
+
+                <Button
+                  type="button"
+                  className="h-11 rounded-xl bg-slate-900 px-5 font-semibold text-white shadow-sm transition hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
+                  onClick={handleUploadGallery}
+                  disabled={galleryUploading}
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+
+                  {galleryUploading
+                    ? "Uploading..."
+                    : "Upload Gallery"}
+                </Button>
+              </div>
+            </div>
+
+            {/* Selected gallery files */}
+            {galleryFiles.length > 0 && (
+              <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                {galleryFiles.map((file, index) => (
+                  <div
+                    key={index}
+                    className="group relative overflow-hidden rounded-xl border border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-950"
+                  >
+                    <img
+                      src={URL.createObjectURL(file)}
+                      alt={`Selected ${index + 1}`}
+                      className="h-40 w-full object-cover"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setGalleryFiles((prev) =>
+                          prev.filter((_, i) => i !== index),
+                        )
+                      }
+                      className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/70 text-white backdrop-blur-sm transition hover:bg-red-600"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Uploaded gallery */}
+            {formData.gallery && (
+              <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                {formData.gallery.map((image, index) => (
+                  <div
+                    key={index}
+                    className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700"
+                  >
+                    <img
+                      src={image}
+                      alt={`Gallery ${index + 1}`}
+                      className="h-40 w-full object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* =====================================================
+              CONTENT EDITOR
+          ====================================================== */}
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+            <div className="mb-5 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500/10">
+                <FileText className="h-5 w-5 text-orange-500" />
+              </div>
+
+              <div>
+                <h2 className="font-semibold text-slate-900 dark:text-white">
+                  Article Content
+                </h2>
+
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Write the content of your article.
+                </p>
+              </div>
+            </div>
+
+            <div className="create-post-editor overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
+              <ReactQuill
+                theme="snow"
+                placeholder="Write something here..."
+                className="h-72 mb-12"
+                required
+                onChange={(value) => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    content: value,
+                  }));
+                }}
+              />
+            </div>
+          </section>
+
+          {/* =====================================================
+              PUBLISH
+          ====================================================== */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5">
+            <Button
+              type="submit"
+              className="h-12 w-full rounded-xl bg-orange-500 text-sm font-bold text-white shadow-sm transition-all hover:bg-orange-600 hover:shadow-md"
+            >
+              <Send className="mr-2 h-4 w-4" />
+              Publish Your Article
+            </Button>
+
+            {createPostError && (
+              <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-600 dark:bg-red-950/30">
+                {createPostError}
+              </p>
+            )}
+          </div>
+        </form>
+      </div>
+
+      {/* =====================================================
+          QUILL CUSTOM STYLE
+      ====================================================== */}
+      <style>{`
+        .create-post-editor .ql-toolbar {
+          border: 0;
+          border-bottom: 1px solid rgb(226 232 240);
+          background: rgb(248 250 252);
+          padding: 12px;
+        }
+
+        .create-post-editor .ql-container {
+          border: 0;
+          font-size: 15px;
+        }
+
+        .create-post-editor .ql-editor {
+          min-height: 250px;
+          padding: 18px;
+          line-height: 1.7;
+        }
+
+        .create-post-editor .ql-editor.ql-blank::before {
+          color: rgb(148 163 184);
+          font-style: normal;
+        }
+
+        .dark .create-post-editor .ql-toolbar {
+          border-color: rgb(51 65 85);
+          background: rgb(15 23 42);
+        }
+
+        .dark .create-post-editor .ql-container {
+          background: rgb(15 23 42);
+          color: white;
+        }
+
+        .dark .create-post-editor .ql-stroke {
+          stroke: rgb(203 213 225);
+        }
+
+        .dark .create-post-editor .ql-fill {
+          fill: rgb(203 213 225);
+        }
+
+        .dark .create-post-editor .ql-picker {
+          color: rgb(203 213 225);
+        }
+
+        .dark .create-post-editor .ql-picker-options {
+          background: rgb(15 23 42);
+          border-color: rgb(51 65 85);
+        }
+      `}</style>
     </div>
   );
 };

@@ -216,3 +216,55 @@
   margin-top: 0 !important;
   margin-bottom: 0 !important;
 }
+
+/* Edit Post - React Quill */
+.edit-post-quill .ql-toolbar {
+  border: 0;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.edit-post-quill .ql-container {
+  border: 0;
+  background: white;
+  font-size: 15px;
+}
+
+.edit-post-quill .ql-editor {
+  min-height: 260px;
+  color: #0f172a;
+}
+
+.dark .edit-post-quill .ql-toolbar {
+  border-bottom-color: #334155;
+  background: #1e293b;
+}
+
+.dark .edit-post-quill .ql-container {
+  background: #0f172a;
+}
+
+.dark .edit-post-quill .ql-editor {
+  color: #e2e8f0;
+}
+
+.dark .edit-post-quill .ql-editor.ql-blank::before {
+  color: #64748b;
+}
+
+.dark .edit-post-quill .ql-stroke {
+  stroke: #cbd5e1;
+}
+
+.dark .edit-post-quill .ql-fill {
+  fill: #cbd5e1;
+}
+
+.dark .edit-post-quill .ql-picker {
+  color: #cbd5e1;
+}
+
+.dark .edit-post-quill .ql-picker-options {
+  background: #1e293b;
+  border-color: #334155;
+}
