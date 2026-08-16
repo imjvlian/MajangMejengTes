@@ -1,11 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import {
-  Facebook,
-  Instagram,
-  Twitter,
   ArrowUpRight,
 } from "lucide-react";
+import { FaFacebook, FaInstagram, FaTwitter } from "react-icons/fa";
 
 const Footer = () => {
   return (
@@ -131,7 +129,7 @@ const Footer = () => {
                 aria-label="Facebook"
                 className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition-all hover:border-orange-500 hover:bg-orange-500 hover:text-white dark:border-slate-700 dark:text-slate-400 dark:hover:border-orange-500 dark:hover:bg-orange-500 dark:hover:text-white"
               >
-                <Facebook className="h-4 w-4" />
+                <FaFacebook className="h-4 w-4" />
               </a>
 
               <a
@@ -139,7 +137,7 @@ const Footer = () => {
                 aria-label="Instagram"
                 className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition-all hover:border-orange-500 hover:bg-orange-500 hover:text-white dark:border-slate-700 dark:text-slate-400 dark:hover:border-orange-500 dark:hover:bg-orange-500 dark:hover:text-white"
               >
-                <Instagram className="h-4 w-4" />
+                <FaInstagram className="h-4 w-4" />
               </a>
 
               <a
@@ -147,7 +145,7 @@ const Footer = () => {
                 aria-label="Twitter"
                 className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition-all hover:border-orange-500 hover:bg-orange-500 hover:text-white dark:border-slate-700 dark:text-slate-400 dark:hover:border-orange-500 dark:hover:bg-orange-500 dark:hover:text-white"
               >
-                <Twitter className="h-4 w-4" />
+                <FaTwitter className="h-4 w-4" />
               </a>
             </div>
           </div>
