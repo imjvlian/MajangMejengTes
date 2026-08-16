@@ -4,15 +4,19 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Switch } from "../ui/switch";
-import {
-  FaEdit,
-  FaTrash,
-  FaPlus,
-  FaTimes,
-  FaInstagram,
-  FaWhatsapp,
-  FaUsers,
-} from "react-icons/fa";
+import { FaEdit, FaTrash, FaPlus, FaTimes } from "react-icons/fa";
+
+const EMPTY_FORM = {
+  name: "",
+  role: "",
+  position: "",
+  bio: "",
+  image: "",
+  instagram: "",
+  whatsapp: "",
+  order: 0,
+  isActive: true,
+};
 
 const DashboardTeam = () => {
   const { currentUser } = useSelector((state) => state.user);
@@ -21,22 +25,13 @@ const DashboardTeam = () => {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [saving, setSaving] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const [formData, setFormData] = useState({
-    name: "",
-    position: "",
-    bio: "",
-    image: "",
-    instagram: "",
-    whatsapp: "",
-    order: 0,
-    isActive: true,
-  });
+  const [formData, setFormData] = useState(EMPTY_FORM);
 
-  // =========================================================
+  // =====================================================
   // FETCH TEAM
-  // =========================================================
+  // =====================================================
 
   const fetchTeam = async () => {
     try {
@@ -44,54 +39,51 @@ const DashboardTeam = () => {
 
       const res = await fetch("/api/team");
 
-      const data = await res.json();
+      const contentType = res.headers.get("content-type");
+
+      let data;
+
+      if (contentType && contentType.includes("application/json")) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+
+        throw new Error(
+          `Server returned non-JSON response (${res.status}): ${text.slice(
+            0,
+            200
+          )}`
+        );
+      }
 
       if (!res.ok) {
-        console.log(data.message || "Failed to fetch team");
-        setTeam([]);
-        return;
+        throw new Error(data?.message || "Failed to fetch team");
       }
 
-      /*
-        API bisa mengembalikan:
-
-        {
-          teams: [...]
-        }
-
-        atau:
-
-        {
-          team: [...]
-        }
-
-        atau langsung:
-
-        [...]
-      */
-
-      let teamData = [];
-
-      if (Array.isArray(data)) {
-        teamData = data;
-      } else if (Array.isArray(data.teams)) {
-        teamData = data.teams;
-      } else if (Array.isArray(data.team)) {
-        teamData = data.team;
-      }
+      // Backend bisa mengembalikan:
+      // { teams: [...] }
+      // { team: [...] }
+      // atau langsung [...]
+      const teamData = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.teams)
+        ? data.teams
+        : Array.isArray(data?.team)
+        ? data.team
+        : [];
 
       setTeam(teamData);
     } catch (error) {
-      console.log("Failed to fetch team:", error);
+      console.error("Failed to fetch team:", error);
       setTeam([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // =========================================================
-  // LOAD TEAM
-  // =========================================================
+  // =====================================================
+  // INITIAL LOAD
+  // =====================================================
 
   useEffect(() => {
     if (currentUser?.isAdmin) {
@@ -99,11 +91,11 @@ const DashboardTeam = () => {
     } else {
       setLoading(false);
     }
-  }, [currentUser]);
+  }, [currentUser?.isAdmin]);
 
-  // =========================================================
-  // FORM
-  // =========================================================
+  // =====================================================
+  // HANDLE INPUT
+  // =====================================================
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -114,110 +106,122 @@ const DashboardTeam = () => {
     }));
   };
 
-  const resetForm = () => {
-    setFormData({
-      name: "",
-      position: "",
-      bio: "",
-      image: "",
-      instagram: "",
-      whatsapp: "",
-      order: 0,
-      isActive: true,
-    });
+  // =====================================================
+  // RESET FORM
+  // =====================================================
 
+  const resetForm = () => {
+    setFormData(EMPTY_FORM);
     setEditingId(null);
     setShowForm(false);
   };
 
-  // =========================================================
+  // =====================================================
   // SUBMIT
-  // =========================================================
+  // =====================================================
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    const url = editingId
-      ? `/api/team/${editingId}`
-      : "/api/team";
-
-    const res = await fetch(url, {
-      method: editingId ? "PUT" : "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        ...formData,
-        role: formData.position,
-      }),
-    });
-
-    const data = await res.json();
-
-    if (res.ok) {
-      resetForm();
-      fetchTeam();
-    } else {
-      console.log(data.message);
+    if (!formData.name.trim()) {
+      alert("Name is required.");
+      return;
     }
-  } catch (error) {
-    console.log(error.message);
-  }
-};
 
-      /*
-        Jangan langsung memaksa response JSON.
-        Kalau backend/Vercel mengembalikan HTML,
-        kita tidak akan mendapat error:
+    if (!formData.role.trim()) {
+      alert("Role is required.");
+      return;
+    }
 
-        Unexpected token '<'
-      */
+    try {
+      setSubmitting(true);
+
+      const url = editingId
+        ? `/api/team/${editingId}`
+        : "/api/team";
+
+      const method = editingId ? "PUT" : "POST";
+
+      const payload = {
+        name: formData.name.trim(),
+
+        // Backend membutuhkan role
+        role: formData.role.trim(),
+
+        // Tetap kirim position jika schema lama masih menggunakannya
+        position: formData.position.trim(),
+
+        bio: formData.bio.trim(),
+        image: formData.image.trim(),
+        instagram: formData.instagram.trim(),
+        whatsapp: formData.whatsapp.trim(),
+        order: Number(formData.order) || 0,
+        isActive: Boolean(formData.isActive),
+      };
+
+      const res = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(payload),
+      });
 
       const contentType = res.headers.get("content-type");
 
       let data;
 
-      if (contentType?.includes("application/json")) {
+      if (contentType && contentType.includes("application/json")) {
         data = await res.json();
       } else {
         const text = await res.text();
 
-        console.log("Server response:", text);
-
-        data = {
-          message: text || "Server returned an invalid response",
-        };
+        throw new Error(
+          `Server returned non-JSON response (${res.status}): ${text.slice(
+            0,
+            300
+          )}`
+        );
       }
 
       if (!res.ok) {
-        console.log(data.message || "Failed to save team member");
-        return;
+        throw new Error(
+          data?.message || "Failed to save team member"
+        );
       }
+
+      alert(
+        editingId
+          ? "Team member updated successfully."
+          : "Team member added successfully."
+      );
 
       resetForm();
 
       await fetchTeam();
     } catch (error) {
-      console.log("Failed to save team member:", error);
+      console.error("Team submit error:", error);
+      alert(error.message || "Something went wrong.");
     } finally {
-      setSaving(false);
+      setSubmitting(false);
     }
   };
 
-  // =========================================================
+  // =====================================================
   // EDIT
-  // =========================================================
+  // =====================================================
 
   const handleEdit = (member) => {
     setFormData({
       name: member.name || "",
+      role: member.role || member.position || "",
       position: member.position || "",
       bio: member.bio || "",
       image: member.image || "",
       instagram: member.instagram || "",
       whatsapp: member.whatsapp || "",
-      order: Number(member.order) || 0,
+      order: member.order ?? 0,
       isActive: member.isActive ?? true,
     });
 
@@ -230,9 +234,9 @@ const DashboardTeam = () => {
     });
   };
 
-  // =========================================================
+  // =====================================================
   // DELETE
-  // =========================================================
+  // =====================================================
 
   const handleDelete = async (id) => {
     const confirmed = window.confirm(
@@ -244,123 +248,112 @@ const DashboardTeam = () => {
     try {
       const res = await fetch(`/api/team/${id}`, {
         method: "DELETE",
+        credentials: "include",
       });
 
       const contentType = res.headers.get("content-type");
 
       let data;
 
-      if (contentType?.includes("application/json")) {
+      if (contentType && contentType.includes("application/json")) {
         data = await res.json();
       } else {
         const text = await res.text();
 
-        data = {
-          message: text,
-        };
+        throw new Error(
+          `Server returned non-JSON response (${res.status}): ${text.slice(
+            0,
+            200
+          )}`
+        );
       }
 
       if (!res.ok) {
-        console.log(data.message || "Failed to delete member");
-        return;
+        throw new Error(
+          data?.message || "Failed to delete team member"
+        );
       }
 
       setTeam((prev) =>
-        Array.isArray(prev)
-          ? prev.filter((member) => member._id !== id)
-          : []
+        prev.filter((member) => member._id !== id)
       );
     } catch (error) {
-      console.log("Failed to delete team member:", error);
+      console.error("Delete team error:", error);
+      alert(error.message || "Failed to delete team member.");
     }
   };
 
-  // =========================================================
+  // =====================================================
   // TOGGLE ACTIVE
-  // =========================================================
+  // =====================================================
 
   const handleToggle = async (member) => {
     try {
       const newStatus = !member.isActive;
+
+      const payload = {
+        name: member.name,
+        role: member.role || member.position || "",
+        position: member.position || "",
+        bio: member.bio || "",
+        image: member.image || "",
+        instagram: member.instagram || "",
+        whatsapp: member.whatsapp || "",
+        order: Number(member.order) || 0,
+        isActive: newStatus,
+      };
 
       const res = await fetch(`/api/team/${member._id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          ...member,
-          isActive: newStatus,
-          order: Number(member.order) || 0,
-        }),
+        credentials: "include",
+        body: JSON.stringify(payload),
       });
 
       const contentType = res.headers.get("content-type");
 
       let data;
 
-      if (contentType?.includes("application/json")) {
+      if (contentType && contentType.includes("application/json")) {
         data = await res.json();
       } else {
         const text = await res.text();
 
-        data = {
-          message: text,
-        };
+        throw new Error(
+          `Server returned non-JSON response (${res.status}): ${text.slice(
+            0,
+            200
+          )}`
+        );
       }
 
       if (!res.ok) {
-        console.log(data.message || "Failed to update status");
-        return;
+        throw new Error(
+          data?.message || "Failed to update team member"
+        );
       }
 
       setTeam((prev) =>
-        Array.isArray(prev)
-          ? prev.map((item) =>
-              item._id === member._id
-                ? {
-                    ...item,
-                    isActive: newStatus,
-                  }
-                : item
-            )
-          : []
+        prev.map((item) =>
+          item._id === member._id
+            ? {
+                ...item,
+                isActive: newStatus,
+              }
+            : item
+        )
       );
     } catch (error) {
-      console.log("Failed to update team status:", error);
+      console.error("Toggle team error:", error);
+      alert(error.message || "Failed to update team member.");
     }
   };
 
-  // =========================================================
-  // SORT TEAM
-  // =========================================================
-
-  /*
-    PENTING:
-
-    Jangan gunakan:
-
-    team.sort(...)
-
-    karena:
-    1. state bisa bukan array
-    2. sort() memodifikasi array secara langsung
-
-    Kita buat copy terlebih dahulu.
-  */
-
-  const sortedTeam = Array.isArray(team)
-    ? [...team].sort((a, b) => {
-        return (
-          (Number(a.order) || 0) -
-          (Number(b.order) || 0)
-        );
-      })
-    : [];
-
-  // =========================================================
-  // AUTHORIZATION
-  // =========================================================
+  // =====================================================
+  // AUTH
+  // =====================================================
 
   if (!currentUser?.isAdmin) {
     return (
@@ -370,16 +363,27 @@ const DashboardTeam = () => {
     );
   }
 
-  // =========================================================
-  // UI
-  // =========================================================
+  // =====================================================
+  // SORT WITHOUT MUTATING STATE
+  // =====================================================
+
+  const sortedTeam = Array.isArray(team)
+    ? [...team].sort(
+        (a, b) =>
+          (Number(a.order) || 0) -
+          (Number(b.order) || 0)
+      )
+    : [];
+
+  // =====================================================
+  // RENDER
+  // =====================================================
 
   return (
     <div className="w-full p-4 md:p-8">
-
-      {/* =====================================================
+      {/* =================================================
           HEADER
-      ====================================================== */}
+      ================================================== */}
 
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -415,13 +419,12 @@ const DashboardTeam = () => {
         </Button>
       </div>
 
-      {/* =====================================================
+      {/* =================================================
           FORM
-      ====================================================== */}
+      ================================================== */}
 
       {showForm && (
         <div className="mb-8 rounded-xl border bg-card p-6 shadow-sm">
-
           <h2 className="mb-6 text-xl font-semibold">
             {editingId
               ? "Edit Team Member"
@@ -432,13 +435,11 @@ const DashboardTeam = () => {
             onSubmit={handleSubmit}
             className="space-y-5"
           >
-
-            {/* NAME + POSITION */}
+            {/* NAME + ROLE */}
 
             <div className="grid gap-5 md:grid-cols-2">
-
               <div>
-                <label className="text-sm font-medium">
+                <label className="mb-2 block text-sm font-medium">
                   Name
                 </label>
 
@@ -452,25 +453,48 @@ const DashboardTeam = () => {
               </div>
 
               <div>
-                <label className="text-sm font-medium">
-                  Position
+                <label className="mb-2 block text-sm font-medium">
+                  Role
                 </label>
 
                 <Input
-                  name="position"
-                  value={formData.position}
+                  name="role"
+                  value={formData.role}
                   onChange={handleChange}
                   placeholder="Editor in Chief"
                   required
                 />
-              </div>
 
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Required by the team database.
+                </p>
+              </div>
+            </div>
+
+            {/* POSITION */}
+
+            <div>
+              <label className="mb-2 block text-sm font-medium">
+                Position
+              </label>
+
+              <Input
+                name="position"
+                value={formData.position}
+                onChange={handleChange}
+                placeholder="Managing Editor"
+              />
+
+              <p className="mt-1 text-xs text-muted-foreground">
+                Optional. Role is the primary field used by the
+                backend.
+              </p>
             </div>
 
             {/* IMAGE */}
 
             <div>
-              <label className="text-sm font-medium">
+              <label className="mb-2 block text-sm font-medium">
                 Profile Image URL
               </label>
 
@@ -499,7 +523,7 @@ const DashboardTeam = () => {
             {/* BIO */}
 
             <div>
-              <label className="text-sm font-medium">
+              <label className="mb-2 block text-sm font-medium">
                 Bio
               </label>
 
@@ -515,10 +539,8 @@ const DashboardTeam = () => {
             {/* SOCIAL */}
 
             <div className="grid gap-5 md:grid-cols-2">
-
               <div>
-                <label className="flex items-center gap-2 text-sm font-medium">
-                  <FaInstagram />
+                <label className="mb-2 block text-sm font-medium">
                   Instagram
                 </label>
 
@@ -531,8 +553,7 @@ const DashboardTeam = () => {
               </div>
 
               <div>
-                <label className="flex items-center gap-2 text-sm font-medium">
-                  <FaWhatsapp />
+                <label className="mb-2 block text-sm font-medium">
                   WhatsApp
                 </label>
 
@@ -543,15 +564,13 @@ const DashboardTeam = () => {
                   placeholder="628xxxxxxxxxx"
                 />
               </div>
-
             </div>
 
             {/* ORDER + ACTIVE */}
 
             <div className="grid items-end gap-5 sm:grid-cols-2">
-
               <div>
-                <label className="text-sm font-medium">
+                <label className="mb-2 block text-sm font-medium">
                   Display Order
                 </label>
 
@@ -566,7 +585,7 @@ const DashboardTeam = () => {
 
               <div className="flex items-center gap-3">
                 <Switch
-                  checked={Boolean(formData.isActive)}
+                  checked={formData.isActive}
                   onCheckedChange={(value) =>
                     setFormData((prev) => ({
                       ...prev,
@@ -579,105 +598,66 @@ const DashboardTeam = () => {
                   Show on About page
                 </span>
               </div>
-
             </div>
 
             {/* BUTTONS */}
 
             <div className="flex justify-end gap-3">
-
               <Button
                 type="button"
                 variant="outline"
                 onClick={resetForm}
-                disabled={saving}
+                disabled={submitting}
               >
                 Cancel
               </Button>
 
               <Button
                 type="submit"
-                disabled={saving}
+                disabled={submitting}
               >
-                {saving
+                {submitting
                   ? "Saving..."
                   : editingId
                   ? "Update Member"
                   : "Add Member"}
               </Button>
-
             </div>
-
           </form>
         </div>
       )}
 
-      {/* =====================================================
+      {/* =================================================
           TEAM LIST
-      ====================================================== */}
+      ================================================== */}
 
       <div className="overflow-hidden rounded-xl border">
-
         <div className="border-b p-5">
-          <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">
+            Team Members
+          </h2>
 
-            <div>
-              <h2 className="text-lg font-semibold">
-                Team Members
-              </h2>
-
-              <p className="text-sm text-muted-foreground">
-                {sortedTeam.length} member
-                {sortedTeam.length !== 1 ? "s" : ""}
-              </p>
-            </div>
-
-          </div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {sortedTeam.length} team member
+            {sortedTeam.length !== 1 ? "s" : ""}
+          </p>
         </div>
-
-        {/* LOADING */}
 
         {loading ? (
           <div className="p-8 text-center text-muted-foreground">
             Loading team members...
           </div>
-
         ) : sortedTeam.length === 0 ? (
-
-          /* EMPTY */
-
           <div className="p-8 text-center text-muted-foreground">
-            <FaUsers
-              className="mx-auto mb-3"
-              size={30}
-            />
-
-            <p>
-              No team members yet.
-            </p>
-
-            <Button
-              className="mt-4"
-              onClick={() => setShowForm(true)}
-            >
-              <FaPlus className="mr-2" />
-              Add Team Member
-            </Button>
+            No team members yet.
           </div>
-
         ) : (
-
-          /* LIST */
-
           <div className="divide-y">
-
             {sortedTeam.map((member) => (
-
               <div
                 key={member._id}
-                className="flex flex-col gap-5 p-5 transition hover:bg-muted/40 md:flex-row md:items-center"
+                className="flex flex-col gap-5 p-5 md:flex-row md:items-center"
               >
-
                 {/* IMAGE */}
 
                 <img
@@ -685,38 +665,21 @@ const DashboardTeam = () => {
                     member.image ||
                     "https://via.placeholder.com/100"
                   }
-                  alt={member.name || "Team member"}
+                  alt={member.name}
                   className="h-16 w-16 rounded-full bg-muted object-cover"
-                  onError={(e) => {
-                    e.currentTarget.src =
-                      "https://via.placeholder.com/100";
-                  }}
                 />
 
                 {/* INFO */}
 
-                <div className="min-w-0 flex-1">
-
-                  <div className="flex flex-wrap items-center gap-2">
-
-                    <h3 className="font-bold">
-                      {member.name}
-                    </h3>
-
-                    {member.isActive ? (
-                      <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-950 dark:text-green-400">
-                        Visible
-                      </span>
-                    ) : (
-                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-400">
-                        Hidden
-                      </span>
-                    )}
-
-                  </div>
+                <div className="flex-1">
+                  <h3 className="font-bold">
+                    {member.name}
+                  </h3>
 
                   <p className="text-sm text-orange-500">
-                    {member.position}
+                    {member.role ||
+                      member.position ||
+                      "Team Member"}
                   </p>
 
                   <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
@@ -724,50 +687,24 @@ const DashboardTeam = () => {
                       "No biography available."}
                   </p>
 
-                  {/* SOCIAL */}
-
-                  <div className="mt-2 flex items-center gap-3">
+                  <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                    <span>
+                      Order: {member.order ?? 0}
+                    </span>
 
                     {member.instagram && (
-                      <a
-                        href={member.instagram}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-pink-500 transition hover:opacity-70"
-                        title="Instagram"
-                        onClick={(e) =>
-                          e.stopPropagation()
-                        }
-                      >
-                        <FaInstagram />
-                      </a>
+                      <span>Instagram</span>
                     )}
 
                     {member.whatsapp && (
-                      <a
-                        href={`https://wa.me/${String(
-                          member.whatsapp
-                        ).replace(/\D/g, "")}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-green-500 transition hover:opacity-70"
-                        title="WhatsApp"
-                        onClick={(e) =>
-                          e.stopPropagation()
-                        }
-                      >
-                        <FaWhatsapp />
-                      </a>
+                      <span>WhatsApp</span>
                     )}
-
                   </div>
-
                 </div>
 
                 {/* STATUS */}
 
                 <div className="flex items-center gap-2">
-
                   <Switch
                     checked={Boolean(member.isActive)}
                     onCheckedChange={() =>
@@ -780,13 +717,11 @@ const DashboardTeam = () => {
                       ? "Visible"
                       : "Hidden"}
                   </span>
-
                 </div>
 
                 {/* ACTIONS */}
 
                 <div className="flex gap-2">
-
                   <Button
                     variant="outline"
                     size="sm"
@@ -808,16 +743,11 @@ const DashboardTeam = () => {
                     <FaTrash className="mr-2" />
                     Delete
                   </Button>
-
                 </div>
-
               </div>
-
             ))}
-
           </div>
         )}
-
       </div>
     </div>
   );
