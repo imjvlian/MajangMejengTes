@@ -35,6 +35,7 @@ const Search = () => {
   const [loading, setLoading] = useState(false);
   const [categoryLoading, setCategoryLoading] = useState(false);
   const [showMore, setShowMore] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   /*
   |--------------------------------------------------------------------------
@@ -61,8 +62,7 @@ const Search = () => {
               .map((post) => post.category?.trim())
               .filter(
                 (category) =>
-                  category &&
-                  category.toLowerCase() !== "uncategorized",
+                  category && category.toLowerCase() !== "uncategorized",
               ),
           ),
         ].sort((a, b) => a.localeCompare(b));
@@ -243,166 +243,214 @@ const Search = () => {
             SIDEBAR
         ====================================================== */}
 
-        <aside className="w-full shrink-0 border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-[#020617] md:sticky md:top-0 md:h-[calc(100vh-80px)] md:w-[280px] md:border-b-0 md:border-r">
-          <div className="p-5 md:p-6">
-            {/* Sidebar Header */}
+        {/* =====================================================
+    SIDEBAR / MOBILE FILTER
+====================================================== */}
 
-            <div className="mb-7 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500/10">
-                <SlidersHorizontal className="h-5 w-5 text-orange-500" />
-              </div>
+        <aside
+          className={`
+    w-full shrink-0
+    border-b border-slate-200
+    bg-white
+    dark:border-slate-800
+    dark:bg-[#020617]
 
-              <div>
-                <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                  Filters
-                </h2>
+    md:sticky
+    md:top-0
+    md:h-[calc(100vh-80px)]
+    md:w-[280px]
+    md:border-b-0
+    md:border-r
+  `}
+        >
+          {/* Mobile Filter Button */}
+          <div className="p-4 md:hidden">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowMobileFilters((prev) => !prev)}
+              className="h-11 w-full justify-between rounded-lg border-slate-300 bg-white font-semibold dark:border-slate-700 dark:bg-slate-900"
+            >
+              <span className="flex items-center gap-2">
+                <SlidersHorizontal className="h-4 w-4 text-orange-500" />
+                Filters
+              </span>
 
-                <p className="text-xs text-slate-500">
-                  Refine your search
-                </p>
-              </div>
-            </div>
+              <span className="text-xs text-slate-500">
+                {showMobileFilters ? "Hide" : "Show"}
+              </span>
+            </Button>
+          </div>
 
-            <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
-              {/* Search */}
+          {/* Filter Content */}
+          <div
+            className={`
+      ${showMobileFilters ? "block" : "hidden"}
+      md:block
+    `}
+          >
+            <div className="p-5 md:p-6">
+              {/* Sidebar Header */}
 
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  Search Term
-                </label>
+              <div className="mb-7 flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500/10">
+                  <SlidersHorizontal className="h-5 w-5 text-orange-500" />
+                </div>
 
-                <div className="relative">
-                  <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <div>
+                  <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                    Filters
+                  </h2>
 
-                  <Input
-                    placeholder="Search articles..."
-                    id="searchTerm"
-                    type="text"
-                    value={sidebarData.searchTerm}
-                    onChange={handleChange}
-                    className="h-11 rounded-lg border-slate-300 bg-slate-50 pl-10 text-sm text-slate-900 placeholder:text-slate-400 focus:border-orange-500 focus:ring-orange-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:placeholder:text-slate-600"
-                  />
+                  <p className="text-xs text-slate-500">Refine your search</p>
                 </div>
               </div>
 
-              {/* Sort */}
+              <form
+                className="flex flex-col gap-5"
+                onSubmit={(e) => {
+                  handleSubmit(e);
+                  setShowMobileFilters(false);
+                }}
+              >
+                {/* Search */}
 
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  Sort By
-                </label>
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    Search Term
+                  </label>
 
-                <Select
-                  value={sidebarData.sort}
-                  onValueChange={(value) =>
-                    setSidebarData((prev) => ({
-                      ...prev,
-                      sort: value,
-                    }))
-                  }
-                >
-                  <SelectTrigger className="h-11 w-full rounded-lg border-slate-300 bg-slate-50 text-sm dark:border-slate-700 dark:bg-slate-900">
-                    <SelectValue placeholder="Select Order" />
-                  </SelectTrigger>
+                  <div className="relative">
+                    <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
 
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Order by:</SelectLabel>
-
-                      <SelectItem value="desc">Latest</SelectItem>
-
-                      <SelectItem value="asc">Oldest</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* =====================================================
-                  DYNAMIC CATEGORY
-              ====================================================== */}
-
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  Category
-                </label>
-
-                <Select
-                  value={sidebarData.category || undefined}
-                  onValueChange={(value) =>
-                    setSidebarData((prev) => ({
-                      ...prev,
-                      category: value,
-                    }))
-                  }
-                  disabled={categoryLoading}
-                >
-                  <SelectTrigger className="h-11 w-full rounded-lg border-slate-300 bg-slate-50 text-sm dark:border-slate-700 dark:bg-slate-900">
-                    <SelectValue
-                      placeholder={
-                        categoryLoading
-                          ? "Loading categories..."
-                          : "Select a Category"
-                      }
+                    <Input
+                      placeholder="Search articles..."
+                      id="searchTerm"
+                      type="text"
+                      value={sidebarData.searchTerm}
+                      onChange={handleChange}
+                      className="h-11 rounded-lg border-slate-300 bg-slate-50 pl-10 text-sm text-slate-900 placeholder:text-slate-400 focus:border-orange-500 focus:ring-orange-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:placeholder:text-slate-600"
                     />
-                  </SelectTrigger>
+                  </div>
+                </div>
 
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Available Categories</SelectLabel>
+                {/* Sort */}
 
-                      {categories.length === 0 && !categoryLoading ? (
-                        <div className="px-2 py-3 text-sm text-slate-500">
-                          No categories available
-                        </div>
-                      ) : (
-                        categories.map((category) => (
-                          <SelectItem key={category} value={category}>
-                            {formatCategory(category)}
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    Sort By
+                  </label>
 
-                {sidebarData.category && (
-                  <button
-                    type="button"
-                    onClick={() =>
+                  <Select
+                    value={sidebarData.sort}
+                    onValueChange={(value) =>
                       setSidebarData((prev) => ({
                         ...prev,
-                        category: "",
+                        sort: value,
                       }))
                     }
-                    className="w-fit text-xs text-orange-500 hover:text-orange-600 hover:underline"
                   >
-                    Clear category
-                  </button>
-                )}
-              </div>
+                    <SelectTrigger className="h-11 w-full rounded-lg border-slate-300 bg-slate-50 text-sm dark:border-slate-700 dark:bg-slate-900">
+                      <SelectValue placeholder="Select Order" />
+                    </SelectTrigger>
 
-              {/* Buttons */}
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>Order by:</SelectLabel>
 
-              <div className="mt-2 flex flex-col gap-2">
-                <Button
-                  type="submit"
-                  className="h-11 w-full rounded-lg bg-orange-500 font-semibold text-white shadow-sm transition-all hover:bg-orange-600 hover:shadow-md"
-                >
-                  <SearchIcon className="mr-2 h-4 w-4" />
-                  Apply Filters
-                </Button>
+                        <SelectItem value="desc">Latest</SelectItem>
 
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={resetFilters}
-                  className="h-10 w-full rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-900 dark:hover:text-white"
-                >
-                  <RotateCcw className="mr-2 h-4 w-4" />
-                  Reset Filters
-                </Button>
-              </div>
-            </form>
+                        <SelectItem value="asc">Oldest</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Category */}
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    Category
+                  </label>
+
+                  <Select
+                    value={sidebarData.category || undefined}
+                    onValueChange={(value) =>
+                      setSidebarData((prev) => ({
+                        ...prev,
+                        category: value,
+                      }))
+                    }
+                    disabled={categoryLoading}
+                  >
+                    <SelectTrigger className="h-11 w-full rounded-lg border-slate-300 bg-slate-50 text-sm dark:border-slate-700 dark:bg-slate-900">
+                      <SelectValue
+                        placeholder={
+                          categoryLoading
+                            ? "Loading categories..."
+                            : "Select a Category"
+                        }
+                      />
+                    </SelectTrigger>
+
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>Available Categories</SelectLabel>
+
+                        {categories.length === 0 && !categoryLoading ? (
+                          <div className="px-2 py-3 text-sm text-slate-500">
+                            No categories available
+                          </div>
+                        ) : (
+                          categories.map((category) => (
+                            <SelectItem key={category} value={category}>
+                              {formatCategory(category)}
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+
+                  {sidebarData.category && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setSidebarData((prev) => ({
+                          ...prev,
+                          category: "",
+                        }))
+                      }
+                      className="w-fit text-xs text-orange-500 hover:text-orange-600 hover:underline"
+                    >
+                      Clear category
+                    </button>
+                  )}
+                </div>
+
+                {/* Buttons */}
+
+                <div className="mt-2 flex flex-col gap-2">
+                  <Button
+                    type="submit"
+                    className="h-11 w-full rounded-lg bg-orange-500 font-semibold text-white shadow-sm transition-all hover:bg-orange-600 hover:shadow-md"
+                  >
+                    <SearchIcon className="mr-2 h-4 w-4" />
+                    Apply Filters
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={resetFilters}
+                    className="h-10 w-full rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-900 dark:hover:text-white"
+                  >
+                    <RotateCcw className="mr-2 h-4 w-4" />
+                    Reset Filters
+                  </Button>
+                </div>
+              </form>
+            </div>
           </div>
         </aside>
 
@@ -452,9 +500,7 @@ const Search = () => {
                 <div className="text-center">
                   <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-orange-500 dark:border-slate-800 dark:border-t-orange-500" />
 
-                  <p className="text-sm text-slate-500">
-                    Loading articles...
-                  </p>
+                  <p className="text-sm text-slate-500">Loading articles...</p>
                 </div>
               </div>
             )}
@@ -493,10 +539,7 @@ const Search = () => {
               <>
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
                   {posts.map((post) => (
-                    <div
-                      key={post._id}
-                      className="min-w-0"
-                    >
+                    <div key={post._id} className="min-w-0">
                       <PostCard post={post} />
                     </div>
                   ))}
