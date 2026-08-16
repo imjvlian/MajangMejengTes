@@ -21,20 +21,57 @@ const About = () => {
   const [loadingTeam, setLoadingTeam] = useState(true);
   const [selectedMember, setSelectedMember] = useState(null);
 
+  // =====================================================
+  // FETCH TEAM
+  // =====================================================
+
   useEffect(() => {
     const fetchTeam = async () => {
       try {
+        setLoadingTeam(true);
+
         const res = await fetch("/api/team");
 
         const data = await res.json();
 
-        if (res.ok) {
-          setTeam(Array.isArray(data.teams) ? data.teams : []);
-        } else {
-          console.log(data.message);
+        if (!res.ok) {
+          console.error("Failed to fetch team:", data?.message);
+          setTeam([]);
+          return;
         }
+
+        /*
+          Support beberapa kemungkinan response backend:
+
+          {
+            teams: [...]
+          }
+
+          atau
+
+          {
+            team: [...]
+          }
+
+          atau langsung:
+
+          [...]
+        */
+
+        let teamData = [];
+
+        if (Array.isArray(data)) {
+          teamData = data;
+        } else if (Array.isArray(data.teams)) {
+          teamData = data.teams;
+        } else if (Array.isArray(data.team)) {
+          teamData = data.team;
+        }
+
+        setTeam(teamData);
       } catch (error) {
-        console.log("Failed to fetch team:", error.message);
+        console.error("Failed to fetch team:", error);
+        setTeam([]);
       } finally {
         setLoadingTeam(false);
       }
@@ -43,20 +80,74 @@ const About = () => {
     fetchTeam();
   }, []);
 
+  // =====================================================
+  // ACTIVE TEAM
+  // =====================================================
+
   const activeTeam = Array.isArray(team)
     ? [...team]
-        .filter((member) => member.isActive)
-        .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0))
+        .filter((member) => member?.isActive !== false)
+        .sort(
+          (a, b) =>
+            (Number(a?.order) || 0) - (Number(b?.order) || 0)
+        )
     : [];
+
+  // =====================================================
+  // CLOSE MODAL
+  // =====================================================
+
+  const closeModal = () => {
+    setSelectedMember(null);
+  };
+
+  // =====================================================
+  // ESCAPE KEY
+  // =====================================================
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        closeModal();
+      }
+    };
+
+    if (selectedMember) {
+      document.addEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "hidden";
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "";
+    };
+  }, [selectedMember]);
+
+  // =====================================================
+  // HELPERS
+  // =====================================================
+
+  const getPosition = (member) => {
+    return member?.position || member?.role || "Team Member";
+  };
+
+  const getWhatsAppUrl = (number) => {
+    if (!number) return null;
+
+    const cleanNumber = String(number).replace(/\D/g, "");
+
+    if (!cleanNumber) return null;
+
+    return `https://wa.me/${cleanNumber}`;
+  };
 
   return (
     <main className="min-h-screen bg-background">
       {/* =====================================================
           HERO
       ====================================================== */}
-      <section className="relative overflow-hidden border-b">
-        {/* Background decoration */}
 
+      <section className="relative overflow-hidden border-b">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute -left-40 -top-40 h-[500px] w-[500px] rounded-full bg-orange-500/10 blur-[120px]" />
 
@@ -76,28 +167,36 @@ const About = () => {
               <h1 className="max-w-4xl text-5xl font-black leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
                 Stories from
                 <br />
-                <span className="text-orange-500">where we belong.</span>
+                <span className="text-orange-500">
+                  where we belong.
+                </span>
               </h1>
 
               <p className="mt-8 max-w-2xl text-lg leading-8 text-muted-foreground">
-                Majang Mejeng adalah media kreatif lokal yang hadir untuk
-                merekam, mengabarkan, dan mengangkat pelbagai cerita yang tumbuh
-                dan berkembang di Lumajang.
+                Majang Mejeng adalah media kreatif lokal yang hadir
+                untuk merekam, mengabarkan, dan mengangkat pelbagai
+                cerita yang tumbuh dan berkembang di Lumajang.
               </p>
 
               <div className="mt-10 flex flex-wrap gap-4">
                 <Link to="/news">
-                  <button className="group flex h-12 items-center gap-2 rounded-full bg-orange-500 px-7 font-semibold text-white transition hover:bg-orange-600">
+                  <button
+                    type="button"
+                    className="group flex h-12 items-center gap-2 rounded-full bg-orange-500 px-7 font-semibold text-white transition hover:bg-orange-600"
+                  >
                     Explore Our Stories
+
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </button>
                 </Link>
 
+                {/* FIX: sekarang #team benar-benar ada */}
                 <a
                   href="#team"
                   className="flex h-12 items-center gap-2 rounded-full border px-7 font-semibold transition hover:bg-muted"
                 >
                   Meet Our Team
+
                   <ChevronRight className="h-4 w-4" />
                 </a>
               </div>
@@ -128,10 +227,10 @@ const About = () => {
                 </div>
               </div>
 
-              {/* Floating card */}
-
               <div className="absolute -bottom-8 -left-6 hidden rounded-2xl border bg-background p-5 shadow-xl sm:block">
-                <p className="text-3xl font-black text-orange-500">2026</p>
+                <p className="text-3xl font-black text-orange-500">
+                  2026
+                </p>
 
                 <p className="mt-1 text-sm text-muted-foreground">
                   Building stories
@@ -147,6 +246,7 @@ const About = () => {
       {/* =====================================================
           INTRO
       ====================================================== */}
+
       <section className="border-y bg-muted/30">
         <div className="mx-auto max-w-7xl px-6 py-20 md:py-28">
           <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
@@ -164,16 +264,16 @@ const About = () => {
 
             <div className="space-y-6 text-muted-foreground">
               <p className="text-lg leading-8">
-                Kami percaya bahwa setiap daerah memiliki cerita yang layak
-                untuk didengar. Mulai dari masyarakat, budaya, olahraga,
-                ekonomi, hingga berbagai perkembangan yang terjadi di sekitar
-                kita.
+                Kami percaya bahwa setiap daerah memiliki cerita yang
+                layak untuk didengar. Mulai dari masyarakat, budaya,
+                olahraga, ekonomi, hingga berbagai perkembangan yang
+                terjadi di sekitar kita.
               </p>
 
               <p className="text-lg leading-8">
-                Majang Mejeng hadir sebagai ruang digital untuk menyampaikan
-                cerita tersebut dengan pendekatan yang modern, kreatif, dan
-                mudah diakses.
+                Majang Mejeng hadir sebagai ruang digital untuk
+                menyampaikan cerita tersebut dengan pendekatan yang
+                modern, kreatif, dan mudah diakses.
               </p>
             </div>
           </div>
@@ -183,6 +283,7 @@ const About = () => {
       {/* =====================================================
           VALUES
       ====================================================== */}
+
       <section>
         <div className="mx-auto max-w-7xl px-6 py-20 md:py-28">
           <div className="max-w-2xl">
@@ -198,17 +299,18 @@ const About = () => {
           </div>
 
           <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {/* Card */}
             <div className="group rounded-3xl border bg-card p-7 transition duration-300 hover:-translate-y-2 hover:shadow-xl">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-500/10 text-orange-500">
                 <ShieldCheck />
               </div>
 
-              <h3 className="mt-6 text-xl font-bold">Trusted Journalism</h3>
+              <h3 className="mt-6 text-xl font-bold">
+                Trusted Journalism
+              </h3>
 
               <p className="mt-3 leading-7 text-muted-foreground">
-                Mengutamakan informasi yang relevan, bertanggung jawab, dan
-                dapat dipercaya.
+                Mengutamakan informasi yang relevan, bertanggung jawab,
+                dan dapat dipercaya.
               </p>
             </div>
 
@@ -217,11 +319,13 @@ const About = () => {
                 <Globe2 />
               </div>
 
-              <h3 className="mt-6 text-xl font-bold">Local Perspective</h3>
+              <h3 className="mt-6 text-xl font-bold">
+                Local Perspective
+              </h3>
 
               <p className="mt-3 leading-7 text-muted-foreground">
-                Melihat berbagai peristiwa melalui perspektif masyarakat dan
-                lingkungan lokal.
+                Melihat berbagai peristiwa melalui perspektif masyarakat
+                dan lingkungan lokal.
               </p>
             </div>
 
@@ -230,11 +334,13 @@ const About = () => {
                 <BadgeCheck />
               </div>
 
-              <h3 className="mt-6 text-xl font-bold">Modern Publishing</h3>
+              <h3 className="mt-6 text-xl font-bold">
+                Modern Publishing
+              </h3>
 
               <p className="mt-3 leading-7 text-muted-foreground">
-                Menggabungkan jurnalistik dengan pendekatan digital yang modern
-                dan menarik.
+                Menggabungkan jurnalistik dengan pendekatan digital
+                yang modern dan menarik.
               </p>
             </div>
 
@@ -243,11 +349,13 @@ const About = () => {
                 <Newspaper />
               </div>
 
-              <h3 className="mt-6 text-xl font-bold">Daily Stories</h3>
+              <h3 className="mt-6 text-xl font-bold">
+                Daily Stories
+              </h3>
 
               <p className="mt-3 leading-7 text-muted-foreground">
-                Mengikuti berbagai cerita dan perkembangan yang terjadi setiap
-                hari.
+                Mengikuti berbagai cerita dan perkembangan yang terjadi
+                setiap hari.
               </p>
             </div>
           </div>
@@ -257,6 +365,7 @@ const About = () => {
       {/* =====================================================
           MISSION
       ====================================================== */}
+
       <section className="bg-slate-950 text-white dark:bg-slate-900">
         <div className="mx-auto max-w-7xl px-6 py-20 md:py-28">
           <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
@@ -268,22 +377,29 @@ const About = () => {
 
               <h2 className="mt-7 text-4xl font-black leading-tight md:text-6xl">
                 Make local stories
-                <span className="text-orange-500"> impossible to ignore.</span>
+                <span className="text-orange-500">
+                  {" "}
+                  impossible to ignore.
+                </span>
               </h2>
             </div>
 
             <div>
               <p className="text-lg leading-8 text-slate-300">
-                Kami ingin membangun media lokal yang tidak hanya menyampaikan
-                berita, tetapi juga memberikan ruang bagi ide, komunitas,
-                kreativitas, dan cerita-cerita yang sering kali luput dari
-                perhatian.
+                Kami ingin membangun media lokal yang tidak hanya
+                menyampaikan berita, tetapi juga memberikan ruang bagi
+                ide, komunitas, kreativitas, dan cerita-cerita yang
+                sering kali luput dari perhatian.
               </p>
 
               <div className="mt-8">
                 <Link to="/news">
-                  <button className="inline-flex h-12 items-center rounded-full bg-orange-500 px-7 font-semibold text-white transition hover:bg-orange-600">
+                  <button
+                    type="button"
+                    className="inline-flex h-12 items-center rounded-full bg-orange-500 px-7 font-semibold text-white transition hover:bg-orange-600"
+                  >
                     Read Our Stories
+
                     <ChevronRight className="ml-2 h-4 w-4" />
                   </button>
                 </Link>
@@ -296,7 +412,11 @@ const About = () => {
       {/* =====================================================
           TEAM
       ====================================================== */}
-      <section>
+
+      <section
+        id="team"
+        className="scroll-mt-24"
+      >
         <div className="mx-auto max-w-7xl px-6 py-20 md:py-28">
           <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <div>
@@ -313,11 +433,13 @@ const About = () => {
 
             <div className="flex items-center gap-2 text-muted-foreground">
               <Users className="h-5 w-5" />
+
               <span>Meet our team</span>
             </div>
           </div>
 
           {/* Team */}
+
           <div className="mt-14">
             {loadingTeam ? (
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -330,7 +452,9 @@ const About = () => {
 
                     <div className="space-y-3 p-5">
                       <div className="h-5 w-1/2 rounded bg-muted" />
+
                       <div className="h-4 w-1/3 rounded bg-muted" />
+
                       <div className="h-4 w-full rounded bg-muted" />
                     </div>
                   </div>
@@ -357,28 +481,27 @@ const About = () => {
                     onClick={() => setSelectedMember(member)}
                     className="group overflow-hidden rounded-3xl border bg-card text-left transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-orange-500"
                   >
-                    {/* Image */}
+                    {/* IMAGE */}
+
                     <div className="relative aspect-[4/5] overflow-hidden">
                       <img
                         src={
-                          member.image || "https://via.placeholder.com/600x750"
+                          member.image ||
+                          "https://via.placeholder.com/600x750"
                         }
-                        alt={member.name}
+                        alt={member.name || "Team member"}
                         className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
 
-                      {/* Gradient */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
 
-                      {/* Hover icon */}
                       <div className="absolute right-5 top-5 flex h-11 w-11 translate-y-2 items-center justify-center rounded-full bg-white/90 text-black opacity-0 shadow-lg transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
                         <ArrowUpRight className="h-5 w-5" />
                       </div>
 
-                      {/* Info */}
                       <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
                         <p className="text-sm font-semibold text-orange-400">
-                          {member.position || member.role}
+                          {getPosition(member)}
                         </p>
 
                         <h3 className="mt-1 text-2xl font-black">
@@ -387,14 +510,17 @@ const About = () => {
                       </div>
                     </div>
 
-                    {/* Bio */}
+                    {/* BIO */}
+
                     <div className="p-5">
                       <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
-                        {member.bio || "Member of Majang Mejeng."}
+                        {member.bio ||
+                          "Member of Majang Mejeng."}
                       </p>
 
                       <div className="mt-4 flex items-center text-sm font-semibold text-orange-500">
                         View profile
+
                         <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                       </div>
                     </div>
@@ -407,8 +533,9 @@ const About = () => {
       </section>
 
       {/* =====================================================
-          CREATIVE / MEDIA SECTION
+          CREATIVE / MEDIA
       ====================================================== */}
+
       <section className="border-y bg-muted/30">
         <div className="mx-auto max-w-7xl px-6 py-20 md:py-28">
           <div className="grid gap-8 lg:grid-cols-3">
@@ -427,8 +554,9 @@ const About = () => {
                 </h3>
 
                 <p className="mt-4 max-w-lg leading-7 text-orange-50">
-                  Kami memanfaatkan foto, video, desain, dan berbagai format
-                  digital untuk membuat cerita lebih dekat dengan audiens.
+                  Kami memanfaatkan foto, video, desain, dan berbagai
+                  format digital untuk membuat cerita lebih dekat dengan
+                  audiens.
                 </p>
               </div>
             </div>
@@ -437,11 +565,13 @@ const About = () => {
               <Play className="h-10 w-10 text-orange-500" />
 
               <div className="absolute bottom-8 left-8 right-8">
-                <h3 className="text-3xl font-black">Follow the story.</h3>
+                <h3 className="text-3xl font-black">
+                  Follow the story.
+                </h3>
 
                 <p className="mt-4 leading-7 text-slate-300">
-                  Ikuti perkembangan terbaru Majang Mejeng melalui platform
-                  digital kami.
+                  Ikuti perkembangan terbaru Majang Mejeng melalui
+                  platform digital kami.
                 </p>
               </div>
             </div>
@@ -452,6 +582,7 @@ const About = () => {
       {/* =====================================================
           CTA
       ====================================================== */}
+
       <section>
         <div className="mx-auto max-w-7xl px-6 py-20 md:py-28">
           <div className="relative overflow-hidden rounded-[2rem] bg-orange-500 px-8 py-16 text-center text-white md:px-16">
@@ -471,21 +602,28 @@ const About = () => {
               </h2>
 
               <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-orange-50">
-                Punya informasi, cerita, ide kolaborasi, atau ingin bekerja sama
-                dengan Majang Mejeng? Kami terbuka untuk berbagai bentuk
-                kolaborasi.
+                Punya informasi, cerita, ide kolaborasi, atau ingin
+                bekerja sama dengan Majang Mejeng? Kami terbuka untuk
+                berbagai bentuk kolaborasi.
               </p>
 
               <div className="mt-8 flex flex-wrap justify-center gap-4">
                 <Link to="/contact">
-                  <button className="inline-flex h-12 items-center rounded-full bg-white px-8 font-bold text-orange-500 transition hover:bg-orange-50">
+                  <button
+                    type="button"
+                    className="inline-flex h-12 items-center rounded-full bg-white px-8 font-bold text-orange-500 transition hover:bg-orange-50"
+                  >
                     Contact Us
+
                     <ArrowUpRight className="ml-2 h-4 w-4" />
                   </button>
                 </Link>
 
                 <Link to="/news">
-                  <button className="inline-flex h-12 items-center rounded-full border border-white/40 px-8 font-bold text-white transition hover:bg-white/10">
+                  <button
+                    type="button"
+                    className="inline-flex h-12 items-center rounded-full border border-white/40 px-8 font-bold text-white transition hover:bg-white/10"
+                  >
                     Explore Articles
                   </button>
                 </Link>
@@ -498,19 +636,21 @@ const About = () => {
       {/* =====================================================
           TEAM PROFILE MODAL
       ====================================================== */}
+
       {selectedMember && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
-          onClick={() => setSelectedMember(null)}
+          onClick={closeModal}
         >
           <div
             className="relative max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-[2rem] bg-background shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(event) => event.stopPropagation()}
           >
-            {/* Close */}
+            {/* CLOSE */}
+
             <button
               type="button"
-              onClick={() => setSelectedMember(null)}
+              onClick={closeModal}
               className="absolute right-5 top-5 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur transition hover:bg-black/80"
               aria-label="Close profile"
             >
@@ -518,14 +658,17 @@ const About = () => {
             </button>
 
             <div className="grid max-h-[90vh] overflow-y-auto md:grid-cols-2">
-              {/* Profile Image */}
+              {/* PROFILE IMAGE */}
+
               <div className="relative min-h-[400px] md:min-h-[600px]">
                 <img
                   src={
                     selectedMember.image ||
                     "https://via.placeholder.com/600x750"
                   }
-                  alt={selectedMember.name}
+                  alt={
+                    selectedMember.name || "Team member"
+                  }
                   className="absolute inset-0 h-full w-full object-cover"
                 />
 
@@ -533,7 +676,7 @@ const About = () => {
 
                 <div className="absolute bottom-7 left-7 text-white md:hidden">
                   <p className="text-sm font-semibold text-orange-400">
-                    {selectedMember.position || selectedMember.role}
+                    {getPosition(selectedMember)}
                   </p>
 
                   <h2 className="mt-1 text-3xl font-black">
@@ -542,62 +685,92 @@ const About = () => {
                 </div>
               </div>
 
-              {/* Profile Content */}
+              {/* PROFILE CONTENT */}
+
               <div className="flex flex-col justify-center p-7 md:p-10">
-                <p className="hidden text-sm font-bold uppercase tracking-[0.2em] text-orange-500 md:block">
-                  {selectedMember.position}
+                <p className="text-sm font-bold uppercase tracking-[0.2em] text-orange-500">
+                  {getPosition(selectedMember)}
                 </p>
 
-                <h2 className="mt-2 hidden text-4xl font-black md:block">
+                <h2 className="mt-2 text-4xl font-black">
                   {selectedMember.name}
                 </h2>
 
                 <div className="mt-6 h-px w-16 bg-orange-500" />
 
                 <p className="mt-6 text-base leading-8 text-muted-foreground">
-                  {selectedMember.bio || "Member of Majang Mejeng."}
+                  {selectedMember.bio ||
+                    "Member of Majang Mejeng."}
                 </p>
 
-                {/* Contact */}
-                {(selectedMember.instagram || selectedMember.whatsapp) && (
-                  <div className="mt-8">
-                    <p className="text-sm font-semibold">Connect</p>
+                {/* =================================================
+                    SOCIAL / CONTACT
+                ================================================= */}
 
-                    <div className="mt-3 flex flex-wrap gap-3">
-                      {selectedMember.instagram && (
-                        <a
-                          href={selectedMember.instagram}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center rounded-full border px-5 py-2.5 text-sm font-semibold transition hover:border-orange-500 hover:bg-orange-500 hover:text-white"
-                        >
-                          Instagram
-                          <ArrowUpRight className="ml-2 h-4 w-4" />
-                        </a>
-                      )}
+                <div className="mt-8">
+                  <p className="text-sm font-semibold">
+                    Connect
+                  </p>
 
-                      {selectedMember.whatsapp && (
-                        <a
-                          href={`https://wa.me/${selectedMember.whatsapp.replace(
-                            /\D/g,
-                            "",
-                          )}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center rounded-full bg-green-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-green-600"
-                        >
-                          WhatsApp
-                          <ArrowUpRight className="ml-2 h-4 w-4" />
-                        </a>
+                  <div className="mt-3 flex flex-wrap gap-3">
+                    {/* INSTAGRAM */}
+
+                    {selectedMember.instagram ? (
+                      <a
+                        href={
+                          selectedMember.instagram.startsWith(
+                            "http"
+                          )
+                            ? selectedMember.instagram
+                            : `https://instagram.com/${selectedMember.instagram.replace(
+                                /^@/,
+                                ""
+                              )}`
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center rounded-full border px-5 py-2.5 text-sm font-semibold transition hover:border-orange-500 hover:bg-orange-500 hover:text-white"
+                      >
+                        Instagram
+
+                        <ArrowUpRight className="ml-2 h-4 w-4" />
+                      </a>
+                    ) : null}
+
+                    {/* WHATSAPP */}
+
+                    {selectedMember.whatsapp ? (
+                      <a
+                        href={getWhatsAppUrl(
+                          selectedMember.whatsapp
+                        )}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center rounded-full bg-green-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-green-600"
+                      >
+                        WhatsApp
+
+                        <ArrowUpRight className="ml-2 h-4 w-4" />
+                      </a>
+                    ) : null}
+
+                    {/* FALLBACK */}
+
+                    {!selectedMember.instagram &&
+                      !selectedMember.whatsapp && (
+                        <p className="text-sm text-muted-foreground">
+                          No social media links available.
+                        </p>
                       )}
-                    </div>
                   </div>
-                )}
+                </div>
+
+                {/* CLOSE */}
 
                 <div className="mt-10">
                   <button
                     type="button"
-                    onClick={() => setSelectedMember(null)}
+                    onClick={closeModal}
                     className="inline-flex h-11 items-center rounded-full border px-6 text-sm font-semibold transition hover:bg-muted"
                   >
                     Close Profile
