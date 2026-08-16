@@ -91,12 +91,10 @@ const Header = () => {
     >
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-[76px] items-center justify-between gap-4">
-
           {/* =====================================================
               LEFT — MOBILE MENU + LOGO
           ====================================================== */}
           <div className="flex shrink-0 items-center gap-3">
-
             {/* Mobile Menu */}
             <button
               type="button"
@@ -124,11 +122,7 @@ const Header = () => {
             </button>
 
             {/* Logo */}
-            <Link
-              to="/"
-              onClick={closeMenu}
-              className="flex items-center"
-            >
+            <Link to="/" onClick={closeMenu} className="flex items-center">
               <div className="h-11 w-auto">
                 <img
                   src={logo}
@@ -228,7 +222,6 @@ const Header = () => {
               RIGHT — USER + DARK MODE
           ====================================================== */}
           <div className="flex shrink-0 items-center gap-3">
-
             {currentUser ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -276,9 +269,7 @@ const Header = () => {
                 >
                   <DropdownMenuLabel className="px-3 py-2">
                     <div className="flex flex-col gap-1">
-                      <span className="text-sm font-semibold">
-                        My Account
-                      </span>
+                      <span className="text-sm font-semibold">My Account</span>
 
                       <span className="truncate text-xs font-normal text-slate-500">
                         {currentUser.email}
@@ -418,7 +409,6 @@ const Header = () => {
             "
           >
             <nav className="flex flex-col gap-1">
-
               <Link
                 to="/"
                 onClick={closeMenu}
