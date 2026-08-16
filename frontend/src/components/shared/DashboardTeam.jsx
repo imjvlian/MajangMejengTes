@@ -135,33 +135,36 @@ const DashboardTeam = () => {
   // =========================================================
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!formData.name.trim()) {
-      return;
-    }
+  try {
+    const url = editingId
+      ? `/api/team/${editingId}`
+      : "/api/team";
 
-    try {
-      setSaving(true);
-
-      const url = editingId
-        ? `/api/team/${editingId}`
-        : "/api/team";
-
-      const method = editingId ? "PUT" : "POST";
-
-      const payload = {
+    const res = await fetch(url, {
+      method: editingId ? "PUT" : "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
         ...formData,
-        order: Number(formData.order) || 0,
-      };
+        role: formData.position,
+      }),
+    });
 
-      const res = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+    const data = await res.json();
+
+    if (res.ok) {
+      resetForm();
+      fetchTeam();
+    } else {
+      console.log(data.message);
+    }
+  } catch (error) {
+    console.log(error.message);
+  }
+};
 
       /*
         Jangan langsung memaksa response JSON.

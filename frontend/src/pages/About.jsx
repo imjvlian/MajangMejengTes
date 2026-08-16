@@ -378,7 +378,7 @@ const About = () => {
                       {/* Info */}
                       <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
                         <p className="text-sm font-semibold text-orange-400">
-                          {member.position}
+                          {member.position || member.role}
                         </p>
 
                         <h3 className="mt-1 text-2xl font-black">
@@ -533,7 +533,7 @@ const About = () => {
 
                 <div className="absolute bottom-7 left-7 text-white md:hidden">
                   <p className="text-sm font-semibold text-orange-400">
-                    {selectedMember.position}
+                    {selectedMember.position || selectedMember.role}
                   </p>
 
                   <h2 className="mt-1 text-3xl font-black">
