@@ -172,10 +172,7 @@ const Search = () => {
               </div>
             </div>
 
-            <form
-              className="flex flex-col gap-5"
-              onSubmit={handleSubmit}
-            >
+            <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
               {/* Search */}
 
               <div className="flex flex-col gap-2">
@@ -221,13 +218,9 @@ const Search = () => {
                     <SelectGroup>
                       <SelectLabel>Order by:</SelectLabel>
 
-                      <SelectItem value="desc">
-                        Latest
-                      </SelectItem>
+                      <SelectItem value="desc">Latest</SelectItem>
 
-                      <SelectItem value="asc">
-                        Oldest
-                      </SelectItem>
+                      <SelectItem value="asc">Oldest</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -257,17 +250,11 @@ const Search = () => {
                     <SelectGroup>
                       <SelectLabel>Category:</SelectLabel>
 
-                      <SelectItem value="worldnews">
-                        World News
-                      </SelectItem>
+                      <SelectItem value="worldnews">World News</SelectItem>
 
-                      <SelectItem value="sportsnews">
-                        Sports News
-                      </SelectItem>
+                      <SelectItem value="sportsnews">Sports News</SelectItem>
 
-                      <SelectItem value="localnews">
-                        Local News
-                      </SelectItem>
+                      <SelectItem value="localnews">Local News</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -326,7 +313,6 @@ const Search = () => {
                   <span className="font-semibold text-slate-900 dark:text-slate-300">
                     {posts.length}
                   </span>
-
                   articles
                 </div>
               )}
@@ -342,22 +328,9 @@ const Search = () => {
 
             {loading && (
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                {[1, 2, 3, 4, 5, 6].map((item) => (
-                  <div
-                    key={item}
-                    className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"
-                  >
-                    <div className="aspect-[16/10] animate-pulse bg-slate-200 dark:bg-slate-800" />
-
-                    <div className="space-y-3 p-5">
-                      <div className="h-3 w-24 animate-pulse rounded bg-slate-200 dark:bg-slate-800" />
-
-                      <div className="h-5 w-4/5 animate-pulse rounded bg-slate-200 dark:bg-slate-800" />
-
-                      <div className="h-4 w-full animate-pulse rounded bg-slate-200 dark:bg-slate-800" />
-
-                      <div className="h-10 w-full animate-pulse rounded bg-slate-200 dark:bg-slate-800" />
-                    </div>
+                {posts.map((post) => (
+                  <div key={post._id} className="min-w-0">
+                    <PostCard post={post} />
                   </div>
                 ))}
               </div>
@@ -376,8 +349,8 @@ const Search = () => {
                 </h2>
 
                 <p className="mt-2 max-w-md text-sm leading-6 text-slate-500 dark:text-slate-500">
-                  We couldn't find any articles matching your current
-                  filters. Try changing your search or category.
+                  We couldn't find any articles matching your current filters.
+                  Try changing your search or category.
                 </p>
 
                 <Button
