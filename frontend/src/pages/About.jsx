@@ -606,56 +606,151 @@ const About = () => {
           TEAM PROFILE MODAL
       ====================================================== */}
 
-      {(selectedMember.instagram ||
-        selectedMember.whatsapp ||
-        selectedMember.email) && (
-        <div className="mt-8">
-          <p className="text-sm font-semibold">Connect</p>
+      {/* =====================================================
+    TEAM PROFILE MODAL
+====================================================== */}
+      {selectedMember && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+          onClick={() => setSelectedMember(null)}
+        >
+          <div
+            className="relative max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-[2rem] bg-background shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close */}
+            <button
+              type="button"
+              onClick={() => setSelectedMember(null)}
+              className="absolute right-5 top-5 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur transition hover:bg-black/80"
+              aria-label="Close profile"
+            >
+              <X className="h-5 w-5" />
+            </button>
 
-          <div className="mt-3 flex flex-wrap gap-3">
-            {selectedMember.instagram && (
-              <a
-                href={
-                  selectedMember.instagram.startsWith("http")
-                    ? selectedMember.instagram
-                    : `https://instagram.com/${selectedMember.instagram.replace(
-                        "@",
-                        "",
-                      )}`
-                }
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center rounded-full border px-5 py-2.5 text-sm font-semibold transition hover:border-orange-500 hover:bg-orange-500 hover:text-white"
-              >
-                Instagram
-                <ArrowUpRight className="ml-2 h-4 w-4" />
-              </a>
-            )}
+            <div className="grid max-h-[90vh] overflow-y-auto md:grid-cols-2">
+              {/* =========================================
+            PROFILE IMAGE
+        ========================================== */}
+              <div className="relative min-h-[400px] md:min-h-[600px]">
+                <img
+                  src={
+                    selectedMember.image ||
+                    "https://via.placeholder.com/600x750"
+                  }
+                  alt={selectedMember.name || "Team member"}
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
 
-            {selectedMember.whatsapp && (
-              <a
-                href={`https://wa.me/${String(selectedMember.whatsapp).replace(
-                  /\D/g,
-                  "",
-                )}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center rounded-full border px-5 py-2.5 text-sm font-semibold transition hover:border-green-500 hover:bg-green-500 hover:text-white"
-              >
-                WhatsApp
-                <ArrowUpRight className="ml-2 h-4 w-4" />
-              </a>
-            )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
-            {selectedMember.email && (
-              <a
-                href={`mailto:${selectedMember.email}`}
-                className="inline-flex items-center rounded-full border px-5 py-2.5 text-sm font-semibold transition hover:border-blue-500 hover:bg-blue-500 hover:text-white"
-              >
-                Email
-                <ArrowUpRight className="ml-2 h-4 w-4" />
-              </a>
-            )}
+                {/* Mobile info */}
+                <div className="absolute bottom-7 left-7 right-7 text-white md:hidden">
+                  <p className="text-sm font-semibold uppercase tracking-wider text-orange-400">
+                    {selectedMember.role || "Team Member"}
+                  </p>
+
+                  <h2 className="mt-1 text-3xl font-black">
+                    {selectedMember.name || "Unknown"}
+                  </h2>
+                </div>
+              </div>
+
+              {/* =========================================
+            PROFILE CONTENT
+        ========================================== */}
+              <div className="flex flex-col justify-center p-7 md:p-10">
+                {/* Role */}
+                <p className="text-sm font-bold uppercase tracking-[0.2em] text-orange-500">
+                  {selectedMember.role || "Team Member"}
+                </p>
+
+                {/* Name */}
+                <h2 className="mt-2 text-4xl font-black">
+                  {selectedMember.name || "Unknown"}
+                </h2>
+
+                {/* Divider */}
+                <div className="mt-6 h-px w-16 bg-orange-500" />
+
+                {/* Bio */}
+                <p className="mt-6 text-base leading-8 text-muted-foreground">
+                  {selectedMember.bio ||
+                    selectedMember.shortBio ||
+                    "Member of Majang Mejeng."}
+                </p>
+
+                {/* =====================================
+              CONTACT
+          ====================================== */}
+                {(selectedMember.instagram ||
+                  selectedMember.whatsapp ||
+                  selectedMember.email) && (
+                  <div className="mt-8">
+                    <p className="text-sm font-semibold">Connect</p>
+
+                    <div className="mt-3 flex flex-wrap gap-3">
+                      {/* Instagram */}
+                      {selectedMember.instagram && (
+                        <a
+                          href={
+                            selectedMember.instagram.startsWith("http")
+                              ? selectedMember.instagram
+                              : `https://instagram.com/${selectedMember.instagram.replace(
+                                  "@",
+                                  "",
+                                )}`
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center rounded-full border px-5 py-2.5 text-sm font-semibold transition hover:border-orange-500 hover:bg-orange-500 hover:text-white"
+                        >
+                          Instagram
+                          <ArrowUpRight className="ml-2 h-4 w-4" />
+                        </a>
+                      )}
+
+                      {/* WhatsApp */}
+                      {selectedMember.whatsapp && (
+                        <a
+                          href={`https://wa.me/${String(
+                            selectedMember.whatsapp,
+                          ).replace(/\D/g, "")}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center rounded-full border px-5 py-2.5 text-sm font-semibold transition hover:border-green-500 hover:bg-green-500 hover:text-white"
+                        >
+                          WhatsApp
+                          <ArrowUpRight className="ml-2 h-4 w-4" />
+                        </a>
+                      )}
+
+                      {/* Email */}
+                      {selectedMember.email && (
+                        <a
+                          href={`mailto:${selectedMember.email}`}
+                          className="inline-flex items-center rounded-full border px-5 py-2.5 text-sm font-semibold transition hover:border-blue-500 hover:bg-blue-500 hover:text-white"
+                        >
+                          Email
+                          <ArrowUpRight className="ml-2 h-4 w-4" />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Close */}
+                <div className="mt-10">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedMember(null)}
+                    className="inline-flex h-11 items-center rounded-full border px-6 text-sm font-semibold transition hover:bg-muted"
+                  >
+                    Close Profile
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
