@@ -1,8 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import {
-  ArrowUpRight,
-} from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { FaFacebook, FaInstagram, FaTwitter } from "react-icons/fa";
 
 const Footer = () => {
@@ -11,12 +9,15 @@ const Footer = () => {
       {/* Main Footer */}
       <div className="mx-auto max-w-7xl px-5 py-14 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-12 md:grid-cols-3 md:gap-10">
-
           {/* About Us */}
           <div>
             <div className="mb-5 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500 text-sm font-black text-white">
-                MM
+              <div className="flex h-10 w-10 items-center justify-center">
+                <img
+                  src="/majangmejeng.svg"
+                  alt="Majang Mejeng"
+                  className="h-10 w-10 object-contain"
+                />
               </div>
 
               <h2 className="text-lg font-bold tracking-tight">
@@ -25,9 +26,9 @@ const Footer = () => {
             </div>
 
             <p className="max-w-md text-sm leading-7 text-slate-600 dark:text-slate-400">
-              Majang Mejeng adalah media kreatif lokal yang hadir untuk
-              merekam, mengabarkan, dan mengangkat pelbagai cerita yang
-              tumbuh dan berkembang di Lumajang.
+              Majang Mejeng adalah media kreatif lokal yang hadir untuk merekam,
+              mengabarkan, dan mengangkat pelbagai cerita yang tumbuh dan
+              berkembang di Lumajang.
             </p>
           </div>
 
@@ -110,11 +111,10 @@ const Footer = () => {
       {/* Bottom Footer */}
       <div className="border-t border-slate-200 dark:border-slate-800">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-5 py-7 sm:px-6 md:flex-row lg:px-8">
-
           {/* Copyright */}
           <p className="order-2 text-center text-xs text-slate-500 dark:text-slate-500 md:order-1 md:text-left">
-            &copy; {new Date().getFullYear()}, Made with 🤍 by JVLIAN,
-            All rights reserved.
+            &copy; {new Date().getFullYear()}, Made with 🤍 by JVLIAN, All
+            rights reserved.
           </p>
 
           {/* Social Media */}
