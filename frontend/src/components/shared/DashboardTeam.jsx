@@ -183,6 +183,7 @@ const DashboardTeam = () => {
       name: "",
       role: "",
       position: "",
+      email: "",
       bio: "",
       image: "",
       imageFileId: "",
