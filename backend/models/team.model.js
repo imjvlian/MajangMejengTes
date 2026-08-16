@@ -14,6 +14,10 @@ const teamSchema = new mongoose.Schema(
       trim: true,
     },
 
+    position: {
+      type: String,
+    },
+
     category: {
       type: String,
       default: "Team",
@@ -44,6 +48,11 @@ const teamSchema = new mongoose.Schema(
       default: "",
     },
 
+    whatsapp: {
+      type: String,
+      default: "",
+    },
+
     email: {
       type: String,
       default: "",
@@ -61,7 +70,7 @@ const teamSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 const Team = mongoose.model("Team", teamSchema);

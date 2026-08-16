@@ -89,10 +89,10 @@ const DashboardTeam = () => {
       const teamData = Array.isArray(data)
         ? data
         : Array.isArray(data.teams)
-        ? data.teams
-        : Array.isArray(data.team)
-        ? data.team
-        : [];
+          ? data.teams
+          : Array.isArray(data.team)
+            ? data.team
+            : [];
 
       setTeam(teamData);
     } catch (error) {
@@ -278,7 +278,7 @@ const DashboardTeam = () => {
           } catch (deleteError) {
             console.warn(
               "Old Appwrite image could not be deleted:",
-              deleteError
+              deleteError,
             );
           }
         }
@@ -325,9 +325,7 @@ const DashboardTeam = () => {
       |--------------------------------------------------------------------------
       */
 
-      const url = editingId
-        ? `/api/team/${editingId}`
-        : "/api/team";
+      const url = editingId ? `/api/team/${editingId}` : "/api/team";
 
       const res = await fetch(url, {
         method: editingId ? "PUT" : "POST",
@@ -357,14 +355,12 @@ const DashboardTeam = () => {
       } else {
         const text = await res.text();
 
-        throw new Error(
-          `Server returned ${res.status}: ${text.slice(0, 200)}`
-        );
+        throw new Error(`Server returned ${res.status}: ${text.slice(0, 200)}`);
       }
 
       if (!res.ok) {
         throw new Error(
-          data.message || data.error || "Failed to save team member."
+          data.message || data.error || "Failed to save team member.",
         );
       }
 
@@ -377,7 +373,7 @@ const DashboardTeam = () => {
       alert(
         editingId
           ? "Team member updated successfully."
-          : "Team member added successfully."
+          : "Team member added successfully.",
       );
 
       resetForm();
@@ -447,7 +443,7 @@ const DashboardTeam = () => {
 
   const handleDelete = async (member) => {
     const confirmed = window.confirm(
-      `Are you sure you want to delete ${member.name}?`
+      `Are you sure you want to delete ${member.name}?`,
     );
 
     if (!confirmed) return;
@@ -466,14 +462,12 @@ const DashboardTeam = () => {
       } else {
         const text = await res.text();
 
-        throw new Error(
-          `Server returned ${res.status}: ${text.slice(0, 200)}`
-        );
+        throw new Error(`Server returned ${res.status}: ${text.slice(0, 200)}`);
       }
 
       if (!res.ok) {
         throw new Error(
-          data.message || data.error || "Failed to delete team member."
+          data.message || data.error || "Failed to delete team member.",
         );
       }
 
@@ -487,7 +481,7 @@ const DashboardTeam = () => {
         } catch (error) {
           console.warn(
             "Team deleted but Appwrite image could not be deleted:",
-            error
+            error,
           );
         }
       }
@@ -499,7 +493,7 @@ const DashboardTeam = () => {
       setTeam((prev) =>
         Array.isArray(prev)
           ? prev.filter((item) => item._id !== member._id)
-          : []
+          : [],
       );
 
       alert("Team member deleted successfully.");
@@ -550,14 +544,12 @@ const DashboardTeam = () => {
       } else {
         const text = await res.text();
 
-        throw new Error(
-          `Server returned ${res.status}: ${text.slice(0, 200)}`
-        );
+        throw new Error(`Server returned ${res.status}: ${text.slice(0, 200)}`);
       }
 
       if (!res.ok) {
         throw new Error(
-          data.message || data.error || "Failed to update team member."
+          data.message || data.error || "Failed to update team member.",
         );
       }
 
@@ -569,9 +561,9 @@ const DashboardTeam = () => {
                     ...item,
                     isActive: newStatus,
                   }
-                : item
+                : item,
             )
-          : []
+          : [],
       );
     } catch (error) {
       console.error("Failed to toggle team member:", error);
@@ -611,9 +603,7 @@ const DashboardTeam = () => {
   */
 
   const sortedTeam = Array.isArray(team)
-    ? [...team].sort(
-        (a, b) => (Number(a.order) || 0) - (Number(b.order) || 0)
-      )
+    ? [...team].sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0))
     : [];
 
   /*
@@ -675,9 +665,7 @@ const DashboardTeam = () => {
 
             <div className="grid gap-5 md:grid-cols-2">
               <div>
-                <label className="mb-2 block text-sm font-medium">
-                  Name
-                </label>
+                <label className="mb-2 block text-sm font-medium">Name</label>
 
                 <Input
                   name="name"
@@ -689,9 +677,7 @@ const DashboardTeam = () => {
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-medium">
-                  Role
-                </label>
+                <label className="mb-2 block text-sm font-medium">Role</label>
 
                 <Input
                   name="role"
@@ -710,9 +696,7 @@ const DashboardTeam = () => {
             {/* Position */}
 
             <div>
-              <label className="mb-2 block text-sm font-medium">
-                Position
-              </label>
+              <label className="mb-2 block text-sm font-medium">Position</label>
 
               <Input
                 name="position"
@@ -746,9 +730,7 @@ const DashboardTeam = () => {
                     <div className="flex h-full flex-col items-center justify-center text-muted-foreground">
                       <FaImage className="mb-2 text-3xl" />
 
-                      <span className="text-xs">
-                        No photo
-                      </span>
+                      <span className="text-xs">No photo</span>
                     </div>
                   )}
                 </div>
@@ -762,9 +744,7 @@ const DashboardTeam = () => {
                   >
                     <FaUpload className="mr-2" />
 
-                    {selectedFile
-                      ? "Change Photo"
-                      : "Choose Photo"}
+                    {selectedFile ? "Change Photo" : "Choose Photo"}
                   </label>
 
                   <input
@@ -785,19 +765,14 @@ const DashboardTeam = () => {
 
                   {selectedFile && (
                     <div className="mt-3 rounded-lg bg-muted p-3 text-sm">
-                      <p className="font-medium">
-                        Selected file:
-                      </p>
+                      <p className="font-medium">Selected file:</p>
 
                       <p className="mt-1 break-all text-muted-foreground">
                         {selectedFile.name}
                       </p>
 
                       <p className="text-xs text-muted-foreground">
-                        {(selectedFile.size / 1024 / 1024).toFixed(
-                          2
-                        )}{" "}
-                        MB
+                        {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
                       </p>
                     </div>
                   )}
@@ -808,9 +783,7 @@ const DashboardTeam = () => {
             {/* Bio */}
 
             <div>
-              <label className="mb-2 block text-sm font-medium">
-                Bio
-              </label>
+              <label className="mb-2 block text-sm font-medium">Bio</label>
 
               <Textarea
                 name="bio"
@@ -823,12 +796,10 @@ const DashboardTeam = () => {
 
             {/* Social */}
 
-            <div className="grid gap-5 md:grid-cols-2">
+            <div className="grid md:grid-cols-3 gap-5">
+              {/* Instagram */}
               <div>
-                <label className="mb-2 flex items-center gap-2 text-sm font-medium">
-                  <FaInstagram className="text-pink-500" />
-                  Instagram
-                </label>
+                <label className="text-sm font-medium">Instagram</label>
 
                 <Input
                   name="instagram"
@@ -838,17 +809,28 @@ const DashboardTeam = () => {
                 />
               </div>
 
+              {/* WhatsApp */}
               <div>
-                <label className="mb-2 flex items-center gap-2 text-sm font-medium">
-                  <FaWhatsapp className="text-green-500" />
-                  WhatsApp
-                </label>
+                <label className="text-sm font-medium">WhatsApp</label>
 
                 <Input
                   name="whatsapp"
                   value={formData.whatsapp}
                   onChange={handleChange}
-                  placeholder="628xxxxxxxxxx"
+                  placeholder="628123456789"
+                />
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className="text-sm font-medium">Email</label>
+
+                <Input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="email@example.com"
                 />
               </div>
             </div>
@@ -881,9 +863,7 @@ const DashboardTeam = () => {
                   }
                 />
 
-                <span className="text-sm font-medium">
-                  Show on About page
-                </span>
+                <span className="text-sm font-medium">Show on About page</span>
               </div>
             </div>
 
@@ -904,9 +884,7 @@ const DashboardTeam = () => {
                   <>
                     <FaSpinner className="mr-2 animate-spin" />
 
-                    {editingId
-                      ? "Updating..."
-                      : "Uploading..."}
+                    {editingId ? "Updating..." : "Uploading..."}
                   </>
                 ) : editingId ? (
                   <>
@@ -931,9 +909,7 @@ const DashboardTeam = () => {
 
       <div className="overflow-hidden rounded-xl border">
         <div className="border-b p-5">
-          <h2 className="text-lg font-semibold">
-            Team Members
-          </h2>
+          <h2 className="text-lg font-semibold">Team Members</h2>
 
           <p className="mt-1 text-sm text-muted-foreground">
             {sortedTeam.length} team member
@@ -961,10 +937,7 @@ const DashboardTeam = () => {
                 {/* Image */}
 
                 <img
-                  src={
-                    member.image ||
-                    "https://via.placeholder.com/100"
-                  }
+                  src={member.image || "https://via.placeholder.com/100"}
                   alt={member.name}
                   className="h-16 w-16 rounded-full bg-muted object-cover"
                 />
@@ -972,9 +945,7 @@ const DashboardTeam = () => {
                 {/* Info */}
 
                 <div className="min-w-0 flex-1">
-                  <h3 className="font-bold">
-                    {member.name}
-                  </h3>
+                  <h3 className="font-bold">{member.name}</h3>
 
                   <p className="text-sm font-medium text-orange-500">
                     {member.position}
@@ -1012,15 +983,11 @@ const DashboardTeam = () => {
                 <div className="flex items-center gap-2">
                   <Switch
                     checked={Boolean(member.isActive)}
-                    onCheckedChange={() =>
-                      handleToggle(member)
-                    }
+                    onCheckedChange={() => handleToggle(member)}
                   />
 
                   <span className="text-sm">
-                    {member.isActive
-                      ? "Visible"
-                      : "Hidden"}
+                    {member.isActive ? "Visible" : "Hidden"}
                   </span>
                 </div>
 
@@ -1039,9 +1006,7 @@ const DashboardTeam = () => {
                   <Button
                     variant="destructive"
                     size="sm"
-                    onClick={() =>
-                      handleDelete(member)
-                    }
+                    onClick={() => handleDelete(member)}
                   >
                     <FaTrash className="mr-2" />
                     Delete

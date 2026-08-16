@@ -87,10 +87,7 @@ const About = () => {
   const activeTeam = Array.isArray(team)
     ? [...team]
         .filter((member) => member?.isActive !== false)
-        .sort(
-          (a, b) =>
-            (Number(a?.order) || 0) - (Number(b?.order) || 0)
-        )
+        .sort((a, b) => (Number(a?.order) || 0) - (Number(b?.order) || 0))
     : [];
 
   // =====================================================
@@ -167,15 +164,13 @@ const About = () => {
               <h1 className="max-w-4xl text-5xl font-black leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
                 Stories from
                 <br />
-                <span className="text-orange-500">
-                  where we belong.
-                </span>
+                <span className="text-orange-500">where we belong.</span>
               </h1>
 
               <p className="mt-8 max-w-2xl text-lg leading-8 text-muted-foreground">
-                Majang Mejeng adalah media kreatif lokal yang hadir
-                untuk merekam, mengabarkan, dan mengangkat pelbagai
-                cerita yang tumbuh dan berkembang di Lumajang.
+                Majang Mejeng adalah media kreatif lokal yang hadir untuk
+                merekam, mengabarkan, dan mengangkat pelbagai cerita yang tumbuh
+                dan berkembang di Lumajang.
               </p>
 
               <div className="mt-10 flex flex-wrap gap-4">
@@ -185,7 +180,6 @@ const About = () => {
                     className="group flex h-12 items-center gap-2 rounded-full bg-orange-500 px-7 font-semibold text-white transition hover:bg-orange-600"
                   >
                     Explore Our Stories
-
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </button>
                 </Link>
@@ -196,7 +190,6 @@ const About = () => {
                   className="flex h-12 items-center gap-2 rounded-full border px-7 font-semibold transition hover:bg-muted"
                 >
                   Meet Our Team
-
                   <ChevronRight className="h-4 w-4" />
                 </a>
               </div>
@@ -228,9 +221,7 @@ const About = () => {
               </div>
 
               <div className="absolute -bottom-8 -left-6 hidden rounded-2xl border bg-background p-5 shadow-xl sm:block">
-                <p className="text-3xl font-black text-orange-500">
-                  2026
-                </p>
+                <p className="text-3xl font-black text-orange-500">2026</p>
 
                 <p className="mt-1 text-sm text-muted-foreground">
                   Building stories
@@ -264,16 +255,16 @@ const About = () => {
 
             <div className="space-y-6 text-muted-foreground">
               <p className="text-lg leading-8">
-                Kami percaya bahwa setiap daerah memiliki cerita yang
-                layak untuk didengar. Mulai dari masyarakat, budaya,
-                olahraga, ekonomi, hingga berbagai perkembangan yang
-                terjadi di sekitar kita.
+                Kami percaya bahwa setiap daerah memiliki cerita yang layak
+                untuk didengar. Mulai dari masyarakat, budaya, olahraga,
+                ekonomi, hingga berbagai perkembangan yang terjadi di sekitar
+                kita.
               </p>
 
               <p className="text-lg leading-8">
-                Majang Mejeng hadir sebagai ruang digital untuk
-                menyampaikan cerita tersebut dengan pendekatan yang
-                modern, kreatif, dan mudah diakses.
+                Majang Mejeng hadir sebagai ruang digital untuk menyampaikan
+                cerita tersebut dengan pendekatan yang modern, kreatif, dan
+                mudah diakses.
               </p>
             </div>
           </div>
@@ -304,13 +295,11 @@ const About = () => {
                 <ShieldCheck />
               </div>
 
-              <h3 className="mt-6 text-xl font-bold">
-                Trusted Journalism
-              </h3>
+              <h3 className="mt-6 text-xl font-bold">Trusted Journalism</h3>
 
               <p className="mt-3 leading-7 text-muted-foreground">
-                Mengutamakan informasi yang relevan, bertanggung jawab,
-                dan dapat dipercaya.
+                Mengutamakan informasi yang relevan, bertanggung jawab, dan
+                dapat dipercaya.
               </p>
             </div>
 
@@ -319,13 +308,11 @@ const About = () => {
                 <Globe2 />
               </div>
 
-              <h3 className="mt-6 text-xl font-bold">
-                Local Perspective
-              </h3>
+              <h3 className="mt-6 text-xl font-bold">Local Perspective</h3>
 
               <p className="mt-3 leading-7 text-muted-foreground">
-                Melihat berbagai peristiwa melalui perspektif masyarakat
-                dan lingkungan lokal.
+                Melihat berbagai peristiwa melalui perspektif masyarakat dan
+                lingkungan lokal.
               </p>
             </div>
 
@@ -334,13 +321,11 @@ const About = () => {
                 <BadgeCheck />
               </div>
 
-              <h3 className="mt-6 text-xl font-bold">
-                Modern Publishing
-              </h3>
+              <h3 className="mt-6 text-xl font-bold">Modern Publishing</h3>
 
               <p className="mt-3 leading-7 text-muted-foreground">
-                Menggabungkan jurnalistik dengan pendekatan digital
-                yang modern dan menarik.
+                Menggabungkan jurnalistik dengan pendekatan digital yang modern
+                dan menarik.
               </p>
             </div>
 
@@ -349,13 +334,11 @@ const About = () => {
                 <Newspaper />
               </div>
 
-              <h3 className="mt-6 text-xl font-bold">
-                Daily Stories
-              </h3>
+              <h3 className="mt-6 text-xl font-bold">Daily Stories</h3>
 
               <p className="mt-3 leading-7 text-muted-foreground">
-                Mengikuti berbagai cerita dan perkembangan yang terjadi
-                setiap hari.
+                Mengikuti berbagai cerita dan perkembangan yang terjadi setiap
+                hari.
               </p>
             </div>
           </div>
@@ -377,19 +360,16 @@ const About = () => {
 
               <h2 className="mt-7 text-4xl font-black leading-tight md:text-6xl">
                 Make local stories
-                <span className="text-orange-500">
-                  {" "}
-                  impossible to ignore.
-                </span>
+                <span className="text-orange-500"> impossible to ignore.</span>
               </h2>
             </div>
 
             <div>
               <p className="text-lg leading-8 text-slate-300">
-                Kami ingin membangun media lokal yang tidak hanya
-                menyampaikan berita, tetapi juga memberikan ruang bagi
-                ide, komunitas, kreativitas, dan cerita-cerita yang
-                sering kali luput dari perhatian.
+                Kami ingin membangun media lokal yang tidak hanya menyampaikan
+                berita, tetapi juga memberikan ruang bagi ide, komunitas,
+                kreativitas, dan cerita-cerita yang sering kali luput dari
+                perhatian.
               </p>
 
               <div className="mt-8">
@@ -399,7 +379,6 @@ const About = () => {
                     className="inline-flex h-12 items-center rounded-full bg-orange-500 px-7 font-semibold text-white transition hover:bg-orange-600"
                   >
                     Read Our Stories
-
                     <ChevronRight className="ml-2 h-4 w-4" />
                   </button>
                 </Link>
@@ -413,10 +392,7 @@ const About = () => {
           TEAM
       ====================================================== */}
 
-      <section
-        id="team"
-        className="scroll-mt-24"
-      >
+      <section id="team" className="scroll-mt-24">
         <div className="mx-auto max-w-7xl px-6 py-20 md:py-28">
           <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <div>
@@ -486,8 +462,7 @@ const About = () => {
                     <div className="relative aspect-[4/5] overflow-hidden">
                       <img
                         src={
-                          member.image ||
-                          "https://via.placeholder.com/600x750"
+                          member.image || "https://via.placeholder.com/600x750"
                         }
                         alt={member.name || "Team member"}
                         className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -514,13 +489,11 @@ const About = () => {
 
                     <div className="p-5">
                       <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
-                        {member.bio ||
-                          "Member of Majang Mejeng."}
+                        {member.bio || "Member of Majang Mejeng."}
                       </p>
 
                       <div className="mt-4 flex items-center text-sm font-semibold text-orange-500">
                         View profile
-
                         <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                       </div>
                     </div>
@@ -554,9 +527,8 @@ const About = () => {
                 </h3>
 
                 <p className="mt-4 max-w-lg leading-7 text-orange-50">
-                  Kami memanfaatkan foto, video, desain, dan berbagai
-                  format digital untuk membuat cerita lebih dekat dengan
-                  audiens.
+                  Kami memanfaatkan foto, video, desain, dan berbagai format
+                  digital untuk membuat cerita lebih dekat dengan audiens.
                 </p>
               </div>
             </div>
@@ -565,13 +537,11 @@ const About = () => {
               <Play className="h-10 w-10 text-orange-500" />
 
               <div className="absolute bottom-8 left-8 right-8">
-                <h3 className="text-3xl font-black">
-                  Follow the story.
-                </h3>
+                <h3 className="text-3xl font-black">Follow the story.</h3>
 
                 <p className="mt-4 leading-7 text-slate-300">
-                  Ikuti perkembangan terbaru Majang Mejeng melalui
-                  platform digital kami.
+                  Ikuti perkembangan terbaru Majang Mejeng melalui platform
+                  digital kami.
                 </p>
               </div>
             </div>
@@ -602,9 +572,9 @@ const About = () => {
               </h2>
 
               <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-orange-50">
-                Punya informasi, cerita, ide kolaborasi, atau ingin
-                bekerja sama dengan Majang Mejeng? Kami terbuka untuk
-                berbagai bentuk kolaborasi.
+                Punya informasi, cerita, ide kolaborasi, atau ingin bekerja sama
+                dengan Majang Mejeng? Kami terbuka untuk berbagai bentuk
+                kolaborasi.
               </p>
 
               <div className="mt-8 flex flex-wrap justify-center gap-4">
@@ -614,7 +584,6 @@ const About = () => {
                     className="inline-flex h-12 items-center rounded-full bg-white px-8 font-bold text-orange-500 transition hover:bg-orange-50"
                   >
                     Contact Us
-
                     <ArrowUpRight className="ml-2 h-4 w-4" />
                   </button>
                 </Link>
@@ -637,147 +606,56 @@ const About = () => {
           TEAM PROFILE MODAL
       ====================================================== */}
 
-      {selectedMember && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
-          onClick={closeModal}
-        >
-          <div
-            className="relative max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-[2rem] bg-background shadow-2xl"
-            onClick={(event) => event.stopPropagation()}
-          >
-            {/* CLOSE */}
+      {(selectedMember.instagram ||
+        selectedMember.whatsapp ||
+        selectedMember.email) && (
+        <div className="mt-8">
+          <p className="text-sm font-semibold">Connect</p>
 
-            <button
-              type="button"
-              onClick={closeModal}
-              className="absolute right-5 top-5 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur transition hover:bg-black/80"
-              aria-label="Close profile"
-            >
-              <X className="h-5 w-5" />
-            </button>
+          <div className="mt-3 flex flex-wrap gap-3">
+            {selectedMember.instagram && (
+              <a
+                href={
+                  selectedMember.instagram.startsWith("http")
+                    ? selectedMember.instagram
+                    : `https://instagram.com/${selectedMember.instagram.replace(
+                        "@",
+                        "",
+                      )}`
+                }
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center rounded-full border px-5 py-2.5 text-sm font-semibold transition hover:border-orange-500 hover:bg-orange-500 hover:text-white"
+              >
+                Instagram
+                <ArrowUpRight className="ml-2 h-4 w-4" />
+              </a>
+            )}
 
-            <div className="grid max-h-[90vh] overflow-y-auto md:grid-cols-2">
-              {/* PROFILE IMAGE */}
+            {selectedMember.whatsapp && (
+              <a
+                href={`https://wa.me/${String(selectedMember.whatsapp).replace(
+                  /\D/g,
+                  "",
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center rounded-full border px-5 py-2.5 text-sm font-semibold transition hover:border-green-500 hover:bg-green-500 hover:text-white"
+              >
+                WhatsApp
+                <ArrowUpRight className="ml-2 h-4 w-4" />
+              </a>
+            )}
 
-              <div className="relative min-h-[400px] md:min-h-[600px]">
-                <img
-                  src={
-                    selectedMember.image ||
-                    "https://via.placeholder.com/600x750"
-                  }
-                  alt={
-                    selectedMember.name || "Team member"
-                  }
-                  className="absolute inset-0 h-full w-full object-cover"
-                />
-
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-
-                <div className="absolute bottom-7 left-7 text-white md:hidden">
-                  <p className="text-sm font-semibold text-orange-400">
-                    {getPosition(selectedMember)}
-                  </p>
-
-                  <h2 className="mt-1 text-3xl font-black">
-                    {selectedMember.name}
-                  </h2>
-                </div>
-              </div>
-
-              {/* PROFILE CONTENT */}
-
-              <div className="flex flex-col justify-center p-7 md:p-10">
-                <p className="text-sm font-bold uppercase tracking-[0.2em] text-orange-500">
-                  {getPosition(selectedMember)}
-                </p>
-
-                <h2 className="mt-2 text-4xl font-black">
-                  {selectedMember.name}
-                </h2>
-
-                <div className="mt-6 h-px w-16 bg-orange-500" />
-
-                <p className="mt-6 text-base leading-8 text-muted-foreground">
-                  {selectedMember.bio ||
-                    "Member of Majang Mejeng."}
-                </p>
-
-                {/* =================================================
-                    SOCIAL / CONTACT
-                ================================================= */}
-
-                <div className="mt-8">
-                  <p className="text-sm font-semibold">
-                    Connect
-                  </p>
-
-                  <div className="mt-3 flex flex-wrap gap-3">
-                    {/* INSTAGRAM */}
-
-                    {selectedMember.instagram ? (
-                      <a
-                        href={
-                          selectedMember.instagram.startsWith(
-                            "http"
-                          )
-                            ? selectedMember.instagram
-                            : `https://instagram.com/${selectedMember.instagram.replace(
-                                /^@/,
-                                ""
-                              )}`
-                        }
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center rounded-full border px-5 py-2.5 text-sm font-semibold transition hover:border-orange-500 hover:bg-orange-500 hover:text-white"
-                      >
-                        Instagram
-
-                        <ArrowUpRight className="ml-2 h-4 w-4" />
-                      </a>
-                    ) : null}
-
-                    {/* WHATSAPP */}
-
-                    {selectedMember.whatsapp ? (
-                      <a
-                        href={getWhatsAppUrl(
-                          selectedMember.whatsapp
-                        )}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center rounded-full bg-green-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-green-600"
-                      >
-                        WhatsApp
-
-                        <ArrowUpRight className="ml-2 h-4 w-4" />
-                      </a>
-                    ) : null}
-
-                    {/* FALLBACK */}
-
-                    {!selectedMember.instagram &&
-                      !selectedMember.whatsapp && (
-                        <p className="text-sm text-muted-foreground">
-                          No social media links available.
-                        </p>
-                      )}
-                  </div>
-                </div>
-
-                {/* CLOSE */}
-
-                <div className="mt-10">
-                  <button
-                    type="button"
-                    onClick={closeModal}
-                    className="inline-flex h-11 items-center rounded-full border px-6 text-sm font-semibold transition hover:bg-muted"
-                  >
-                    Close Profile
-                  </button>
-                </div>
-              </div>
-            </div>
+            {selectedMember.email && (
+              <a
+                href={`mailto:${selectedMember.email}`}
+                className="inline-flex items-center rounded-full border px-5 py-2.5 text-sm font-semibold transition hover:border-blue-500 hover:bg-blue-500 hover:text-white"
+              >
+                Email
+                <ArrowUpRight className="ml-2 h-4 w-4" />
+              </a>
+            )}
           </div>
         </div>
       )}
