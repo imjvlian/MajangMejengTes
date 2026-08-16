@@ -495,7 +495,7 @@ const Search = () => {
                   {posts.map((post) => (
                     <div
                       key={post._id}
-                      className="group min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700"
+                      className="min-w-0"
                     >
                       <PostCard post={post} />
                     </div>
