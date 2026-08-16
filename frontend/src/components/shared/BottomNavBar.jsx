@@ -4,7 +4,6 @@ import React from "react";
 import { BiCategory } from "react-icons/bi";
 import {
   FaComments,
-  FaHome,
   FaSignOutAlt,
   FaUserAlt,
   FaUsers,
@@ -17,11 +16,13 @@ const BottomNavBar = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { currentUser } = useSelector((state) => state.user);
+
   const handleSignout = async () => {
     try {
       const res = await fetch("/api/user/signout", {
         method: "POST",
       });
+
       const data = await res.json();
 
       if (!res.ok) {
@@ -35,73 +36,121 @@ const BottomNavBar = () => {
       console.log(error);
     }
   };
+
+  const navItemClass =
+    "group flex min-w-[52px] flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-slate-600 transition-all duration-200 hover:bg-slate-100 hover:text-orange-500 active:scale-95 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-orange-400";
+
+  const iconClass =
+    "text-[18px] transition-transform duration-200 group-hover:-translate-y-0.5";
+
+  const labelClass =
+    "whitespace-nowrap text-[10px] font-medium leading-none";
+
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-200 border-t border-gray-300 p-2 flex justify-around">
-      <Link
-        to="/dashboard?tab=profile"
-        className="flex flex-col items-center text-slate-800"
+    <nav
+      className="
+        fixed
+        bottom-3
+        left-3
+        right-3
+        z-50
+        md:hidden
+      "
+    >
+      <div
+        className="
+          mx-auto
+          flex
+          w-full
+          max-w-md
+          items-center
+          gap-1
+          overflow-x-auto
+          rounded-2xl
+          border
+          border-slate-200
+          bg-white/95
+          px-2
+          py-2
+          shadow-[0_8px_30px_rgba(0,0,0,0.15)]
+          backdrop-blur-xl
+          dark:border-slate-800
+          dark:bg-slate-950/95
+        "
       >
-        <FaUserAlt size={20} />
-        <span className="text-xs">Profile</span>
-      </Link>
-
-      {currentUser && currentUser.isAdmin && (
+        {/* Profile */}
         <Link
-          to="/create-post"
-          className="flex flex-col items-center text-slate-800"
+          to="/dashboard?tab=profile"
+          className={navItemClass}
         >
-          <IoIosCreate size={20} />
-          <span className="text-xs">Create Post</span>
+          <FaUserAlt className={iconClass} />
+          <span className={labelClass}>Profile</span>
         </Link>
-      )}
 
-      {currentUser && currentUser.isAdmin && (
-        <Link
-          to="/dashboard?tab=posts"
-          className="flex flex-col items-center text-slate-800"
+        {/* Admin Navigation */}
+        {currentUser && currentUser.isAdmin && (
+          <>
+            {/* Create Post */}
+            <Link
+              to="/create-post"
+              className={navItemClass}
+            >
+              <IoIosCreate className={iconClass} />
+              <span className={labelClass}>Create Post</span>
+            </Link>
+
+            {/* Posts */}
+            <Link
+              to="/dashboard?tab=posts"
+              className={navItemClass}
+            >
+              <IoIosDocument className={iconClass} />
+              <span className={labelClass}>Posts</span>
+            </Link>
+
+            {/* Categories */}
+            <Link
+              to="/dashboard?tab=categories"
+              className={navItemClass}
+            >
+              <BiCategory className={iconClass} />
+              <span className={labelClass}>Categories</span>
+            </Link>
+
+            {/* All Users */}
+            <Link
+              to="/dashboard?tab=users"
+              className={navItemClass}
+            >
+              <FaUsers className={iconClass} />
+              <span className={labelClass}>All Users</span>
+            </Link>
+
+            {/* All Comments */}
+            <Link
+              to="/dashboard?tab=comments"
+              className={navItemClass}
+            >
+              <FaComments className={iconClass} />
+              <span className={labelClass}>All Comments</span>
+            </Link>
+          </>
+        )}
+
+        {/* Logout */}
+        <button
+          type="button"
+          onClick={handleSignout}
+          className={`
+            ${navItemClass}
+            border-0
+            bg-transparent
+          `}
         >
-          <IoIosDocument size={20} />
-          <span className="text-xs">Posts</span>
-        </Link>
-      )}
-
-      {currentUser && currentUser.isAdmin && (
-        <Link
-          to={"/dashboard?tab=categories"}
-          className="flex flex-col items-center text-slate-800"
-        >
-          <BiCategory className="mr-3" />
-          <span className="text-xs">Categories</span>
-        </Link>
-      )}
-
-      {currentUser && currentUser.isAdmin && (
-        <Link
-          to={"/dashboard?tab=users"}
-          className="flex flex-col items-center text-slate-800"
-        >
-          <FaUsers className="mr-3" />
-          <span className="text-xs">All Users</span>
-        </Link>
-      )}
-
-      {currentUser && currentUser.isAdmin && (
-        <Link
-          to={"/dashboard?tab=comments"}
-          className="flex flex-col items-center text-slate-800"
-        >
-          <FaComments className="mr-3" />
-          <span className="text-xs">All Comments</span>
-        </Link>
-      )}
-
-      <button
-        className="flex flex-col items-center text-slate-800"
-        onClick={handleSignout}
-      >
-        <FaSignOutAlt size={20} />
-        <span className="text-xs">Logoout</span>
-      </button>
+          <FaSignOutAlt className={iconClass} />
+          <span className={labelClass}>Logout</span>
+        </button>
+      </div>
     </nav>
   );
 };
